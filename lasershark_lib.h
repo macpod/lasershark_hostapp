@@ -24,6 +24,8 @@ along with Lasershark. If not, see <http://www.gnu.org/licenses/>.
 #include <stdint.h>
 #include <libusb.h>
 
+#define LASERSHARK_C_BITMASK 0x4000
+#define LASERSHARK_INTL_A_BITMASK 0x8000
 
 #define LASERSHARK_CMD_SUCCESS 0x00
 #define LASERSHARK_CMD_FAIL 0x01
