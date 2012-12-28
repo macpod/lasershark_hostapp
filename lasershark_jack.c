@@ -191,14 +191,14 @@ static int process (nframes_t nframes, void *arg)
     for (frm = 0; frm < nframes; frm++)
     {
         // Read the data and convert it to a format suitable to be sent out to the lasershark.
-        temp[0] = convert(*i_x++, -1.0f, 1.0f, lasershark_dac_max_val, lasershark_dac_min_val);
-        temp[1] = convert(*i_y++ * -1.0f, -1.0f, 1.0f, lasershark_dac_max_val, lasershark_dac_min_val);
-        temp[2] = convert(*i_g++, -0.0f, 1.0f, lasershark_dac_max_val, lasershark_dac_min_val);
-        for (i = 3; i < lasershark_samp_element_count; i++)
-        {
-            temp[i] = convert(*i_g, -0.0f, 1.0f, lasershark_dac_max_val, lasershark_dac_min_val); // Duplicate last channel.
-        }
-
+        temp[0] = convert(*i_g, -0.0f, 1.0f, lasershark_dac_max_val, lasershark_dac_min_val);
+        if (temp[0] >= (lasershark_dac_max_val + lasershark_dac_min_val)/2) {
+		temp[0] |= LASERSHARK_C_BITMASK; // If the laser power is >= half the dac output.. turn this ttl channel on.
+	}
+	temp[0] |= LASERSHARK_INTL_A_BITMASK; // Turn on the interlock pin since this is a valid sample.
+        temp[1] = convert(*i_g++, -0.0f, 1.0f, lasershark_dac_max_val, lasershark_dac_min_val);
+        temp[2] = convert(*i_x++, -1.0f, 1.0f, lasershark_dac_max_val, lasershark_dac_min_val);
+        temp[3] = convert(*i_y++ * -1.0f, -1.0f, 1.0f, lasershark_dac_max_val, lasershark_dac_min_val);
         // Jam the samples in the ringbuffer.
         avail = jack_ringbuffer_write_space(jack_rb);
         if (avail >= lasershark_samp_element_count*sizeof(uint16_t))
