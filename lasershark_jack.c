@@ -108,7 +108,7 @@ Internal callback for cleaning up async writes.
 void
 WriteAsyncCallback(struct libusb_transfer *transfer)
 {
-    if (transfer->status != LIBUSB_TRANSFER_COMPLETED || transfer->actual_length != transfer->length)
+    if (transfer && (transfer->status != LIBUSB_TRANSFER_COMPLETED/* || transfer->actual_length != transfer->length*/))
     {
         printf("ISO transfer err: %d   bytes transferred: %d\n", transfer->status, transfer->actual_length);
     }
