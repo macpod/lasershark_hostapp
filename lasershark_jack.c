@@ -479,11 +479,12 @@ int main (int argc, char *argv[])
     printf("Running\n");
     do
     {
-        sigsuspend (&oldmask);
-        printf("Looping... (Must have recieved a signal, don't panic).\n");
+	libusb_handle_events(0); // Quick hack.. this should be made better later.
+        //sigsuspend (&oldmask);
+        //printf("Looping... (Must have recieved a signal, don't panic).\n");
     }
     while (!do_exit);
-    sigprocmask (SIG_UNBLOCK, &mask, NULL);
+    //sigprocmask (SIG_UNBLOCK, &mask, NULL);
 
 
     printf("Quitting gracefully\n");
