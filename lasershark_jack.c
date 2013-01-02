@@ -57,6 +57,9 @@ uint32_t jack_rb_len = 0;
 uint8_t *laserjack_iso_data_packet_buf = NULL;
 int laserjack_iso_data_packet_len = 0;
 
+int lasershark_serialnum_len = 64;
+unsigned char lasershark_serialnum[64];
+
 uint32_t lasershark_packet_sample_count;
 uint32_t lasershark_samp_element_count;
 uint32_t lasershark_max_ilda_rate;
@@ -325,6 +328,22 @@ int main (int argc, char *argv[])
         libusb_release_interface(devh_ctl, 0);
         goto out_post_release;
     }
+
+
+    struct libusb_device_descriptor desc;
+
+    rc = libusb_get_device_descriptor(libusb_get_device(devh_ctl), &desc);
+    if (rc < 0) {
+        fprintf(stderr, "Error obtaining device descriptor: %d\n", /*libusb_error_name(rc)*/rc);
+    }
+    
+    memset(lasershark_serialnum, lasershark_serialnum_len, 0);
+    rc = libusb_get_string_descriptor_ascii(devh_ctl, desc.iSerialNumber, lasershark_serialnum, lasershark_serialnum_len);
+    if (rc < 0) {
+        fprintf(stderr, "Error obtaining iSerialNumber: %d\n", /*libusb_error_name(rc)*/rc);
+    }
+
+    printf("iSerialNumber: %s\n", lasershark_serialnum);
 
 
     max_iso_data_len = libusb_get_max_iso_packet_size(libusb_get_device(devh_data), (4 | LIBUSB_ENDPOINT_OUT));
