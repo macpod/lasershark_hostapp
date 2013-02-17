@@ -45,7 +45,9 @@ typedef jack_nframes_t nframes_t;
 
 jack_port_t *in_x;
 jack_port_t *in_y;
+jack_port_t *in_r;
 jack_port_t *in_g;
+jack_port_t *in_b;
 
 nframes_t rate;
 
@@ -180,28 +182,44 @@ static uint16_t convert(float OldValue, float OldMin, float OldMax, uint32_t New
 }
 
 
+/*
+This function is only compatible with Lasershark V2.X modules. The format is a 16 byte (little endian) array of 4 elements
+[0] = Channel A output (lower 12 bits), LASERSHARK_C_BITMASK field(0x4000), LASERSHARK_INTL_A_BITMASK(0x8000)
+[1] = Channel B output (lower 12 bits)
+[2] = X Galvo output (lower 12 bits)
+[3] = Y Galvo output (lower 12 bits).
+
+It's pretty messy... A version command should probably be added to the protocol and a check added so this can be used
+with multiple different lasershark versions... but for now, it's good enough.
+
+*/
 static int process (nframes_t nframes, void *arg)
 {
-    uint16_t temp[lasershark_samp_element_count];
+    uint16_t temp[4];
     int avail, written, i, j, rc;
     nframes_t frm;
 
     sample_t *i_x = (sample_t *) jack_port_get_buffer (in_x, nframes);
     sample_t *i_y = (sample_t *) jack_port_get_buffer (in_y, nframes);
+    sample_t *i_r = (sample_t *) jack_port_get_buffer (in_r, nframes);
     sample_t *i_g = (sample_t *) jack_port_get_buffer (in_g, nframes);
+    sample_t *i_b = (sample_t *) jack_port_get_buffer (in_b, nframes);
 
     // Read in all samples given to us from the GODLY JACK SERVER
     for (frm = 0; frm < nframes; frm++)
     {
         // Read the data and convert it to a format suitable to be sent out to the lasershark.
-        temp[0] = convert(*i_g, -0.0f, 1.0f, lasershark_dac_max_val, lasershark_dac_min_val);
-        if (temp[0] >= (lasershark_dac_max_val + lasershark_dac_min_val)/2) {
+        temp[0] = convert(*i_r++, -0.0f, 1.0f, lasershark_dac_max_val, lasershark_dac_min_val);
+        temp[1] = convert(*i_g++, -0.0f, 1.0f, lasershark_dac_max_val, lasershark_dac_min_val);
+        if (convert(*i_b++, -0.0f, 1.0f, lasershark_dac_max_val, lasershark_dac_min_val) >= 
+		(lasershark_dac_max_val + lasershark_dac_min_val)/2) {
 		temp[0] |= LASERSHARK_C_BITMASK; // If the laser power is >= half the dac output.. turn this ttl channel on.
 	}
 	temp[0] |= LASERSHARK_INTL_A_BITMASK; // Turn on the interlock pin since this is a valid sample.
-        temp[1] = convert(*i_g++, -0.0f, 1.0f, lasershark_dac_max_val, lasershark_dac_min_val);
+
         temp[2] = convert(*i_x++, -1.0f, 1.0f, lasershark_dac_max_val, lasershark_dac_min_val);
         temp[3] = convert(*i_y++ * -1.0f, -1.0f, 1.0f, lasershark_dac_max_val, lasershark_dac_min_val);
+
         // Jam the samples in the ringbuffer.
         avail = jack_ringbuffer_write_space(jack_rb);
         if (avail >= lasershark_samp_element_count*sizeof(uint16_t))
@@ -426,7 +444,9 @@ int main (int argc, char *argv[])
 
     in_x = jack_port_register (client, "in_x", JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0);
     in_y = jack_port_register (client, "in_y", JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0);
-    in_g = jack_port_register (client, "in_g", JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0);
+    in_r = jack_port_register (client, "in_g", JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0);
+    in_g = jack_port_register (client, "in_r", JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0);
+    in_b = jack_port_register (client, "in_b", JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0);
 
     if (lasershark_ilda_rate == 0)
     {
