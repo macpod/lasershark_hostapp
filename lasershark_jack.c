@@ -436,7 +436,7 @@ int main (int argc, char *argv[])
     }
     else
     {
-        printf("Getting ringbuffer sample count\n");
+        printf("Getting ringbuffer sample count failed\n");
         goto out;
     }
 
@@ -447,7 +447,7 @@ int main (int argc, char *argv[])
     }
     else
     {
-        printf("Getting ringbuffer empty sample count\n");
+        printf("Getting ringbuffer empty sample count failed\n");
         goto out;
     }
 
