@@ -68,6 +68,8 @@ uint32_t lasershark_max_ilda_rate;
 uint32_t lasershark_dac_min_val;
 uint32_t lasershark_dac_max_val;
 
+uint32_t lasershark_ringbuffer_sample_count;
+
 uint32_t lasershark_ilda_rate = 0;
 
 typedef struct
@@ -302,6 +304,7 @@ static void jack_shutdown (void *arg)
 int main (int argc, char *argv[])
 {
     int rc;
+    uint32_t temp;
     struct sigaction sigact;
 
     char jack_client_name[] = "lasershark";
@@ -426,6 +429,27 @@ int main (int argc, char *argv[])
         goto out;
     }
 
+    rc = get_ringbuffer_sample_count(devh_ctl, &lasershark_ringbuffer_sample_count);
+    if (rc == LASERSHARK_CMD_SUCCESS)
+    {
+        printf("Getting ringbuffer sample count: %d\n", lasershark_ringbuffer_sample_count);
+    }
+    else
+    {
+        printf("Getting ringbuffer sample count\n");
+        goto out;
+    }
+
+    rc = get_ringbuffer_empty_sample_count(devh_ctl, &temp);
+    if (rc == LASERSHARK_CMD_SUCCESS)
+    {
+        printf("Getting ringbuffer empty sample count: %d\n", temp);
+    }
+    else
+    {
+        printf("Getting ringbuffer empty sample count\n");
+        goto out;
+    }
 
     jack_status_t jack_status;
     jack_options_t  jack_options = JackNullOption;

@@ -54,6 +54,20 @@ along with Lasershark. If not, see <http://www.gnu.org/licenses/>.
 // Get max dac value
 #define LASERSHARK_CMD_GET_DAC_MAX 0x88
 
+
+// Get the number of samples the ring buffer is able to store
+#define LASERSHARK_CMD_GET_RINGBUFFER_SAMPLE_COUNT 0X89
+
+// Get the number of samples that are unfilled in the ring buffer
+#define LASERSHARK_CMD_GET_RINGBUFFER_EMPTY_SAMPLE_COUNT 0X8A
+
+// Enable reporting of the buffer status via ISO transfers back to host.
+#define LASERSHARK_CMD_SET_RINGBUFFER_HALF_FULL_REPORTING 0X8B
+#define LASERSHARK_CMD_GET_RINGBUFFER_HALF_FULL_REPORTING 0X8C
+#define LASERSHARK_CMD_RINGBUFFER_HALF_FULL_REPORTING_ENABLE 0x01
+#define LASERSHARK_CMD_RINGBUFFER_HALF_FULL_REPORTING_DISABLE 0x00
+
+
 /*
 Packet format
 To device
@@ -83,6 +97,16 @@ int get_packet_sample_count(libusb_device_handle *devh_ctl, uint32_t *packet_sam
 int get_dac_min(libusb_device_handle *devh_ctl, uint32_t *dac_min);
 
 int get_dac_max(libusb_device_handle *devh_ctl, uint32_t *dac_max);
+
+int get_ringbuffer_sample_count(libusb_device_handle *devh_ctl, uint32_t *ringbuffer_sample_count);
+
+int get_ringbuffer_empty_sample_count(libusb_device_handle *devh_ctl, uint32_t *ringbuffer_empty_sample_count);
+
+int set_ringbuffer_half_empty_reporting(libusb_device_handle *devh_ctl, uint8_t state);
+
+int get_ringbuffer_half_empty_reporting(libusb_device_handle *devh_ctl, uint8_t *state);
+
+
 
 #endif /* LASERSHARK_LIB_H_ */
 

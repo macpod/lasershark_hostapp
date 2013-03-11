@@ -186,3 +186,29 @@ int get_dac_max(libusb_device_handle *devh_ctl, uint32_t *dac_max)
     return get_uint32(devh_ctl, LASERSHARK_CMD_GET_DAC_MAX, dac_max);
 
 }
+
+// Returns LASERSHARK_CMD_SUCCESS on success, LASERSHARK_CMD_FAIL on failure.
+int get_ringbuffer_sample_count(libusb_device_handle *devh_ctl, uint32_t *ringbuffer_sample_count)
+{
+    return get_uint32(devh_ctl, LASERSHARK_CMD_GET_RINGBUFFER_SAMPLE_COUNT, ringbuffer_sample_count);
+}
+
+// Returns LASERSHARK_CMD_SUCCESS on success, LASERSHARK_CMD_FAIL on failure.
+int get_ringbuffer_empty_sample_count(libusb_device_handle *devh_ctl, uint32_t *ringbuffer_empty_sample_count)
+{
+    return get_uint32(devh_ctl, LASERSHARK_CMD_GET_RINGBUFFER_EMPTY_SAMPLE_COUNT, ringbuffer_empty_sample_count);
+}
+
+// Returns LASERSHARK_CMD_SUCCESS on success, LASERSHARK_CMD_FAIL on failure.
+int set_ringbuffer_half_empty_reporting(libusb_device_handle *devh_ctl, uint8_t state)
+{
+    return set_uint8(devh_ctl, LASERSHARK_CMD_SET_RINGBUFFER_HALF_FULL_REPORTING, state);
+}
+
+// Returns LASERSHARK_CMD_SUCCESS on success, LASERSHARK_CMD_FAIL on failure.
+int get_ringbuffer_half_empty_reporting(libusb_device_handle *devh_ctl, uint8_t *state)
+{
+    return get_uint8(devh_ctl, LASERSHARK_CMD_GET_RINGBUFFER_HALF_FULL_REPORTING, state);
+}
+
+
