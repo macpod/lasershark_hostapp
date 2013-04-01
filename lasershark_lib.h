@@ -61,11 +61,12 @@ along with Lasershark. If not, see <http://www.gnu.org/licenses/>.
 // Get the number of samples that are unfilled in the ring buffer
 #define LASERSHARK_CMD_GET_RINGBUFFER_EMPTY_SAMPLE_COUNT 0X8A
 
-// Enable reporting of the buffer status via ISO transfers back to host.
-#define LASERSHARK_CMD_SET_RINGBUFFER_HALF_FULL_REPORTING 0X8B
-#define LASERSHARK_CMD_GET_RINGBUFFER_HALF_FULL_REPORTING 0X8C
-#define LASERSHARK_CMD_RINGBUFFER_HALF_FULL_REPORTING_ENABLE 0x01
-#define LASERSHARK_CMD_RINGBUFFER_HALF_FULL_REPORTING_DISABLE 0x00
+// Version Info
+#define LASERSHARK_FW_MAJOR_VERSION 2
+#define LASERSHARK_FW_MINOR_VERSION 1
+#define LASERSHARK_CMD_GET_LASERSHARK_FW_MAJOR_VERSION 0X8B
+#define LASERSHARK_GMD_GET_LASERSHARK_FW_MINOR_VERSION 0X8C
+
 
 
 /*
@@ -102,9 +103,9 @@ int get_ringbuffer_sample_count(libusb_device_handle *devh_ctl, uint32_t *ringbu
 
 int get_ringbuffer_empty_sample_count(libusb_device_handle *devh_ctl, uint32_t *ringbuffer_empty_sample_count);
 
-int set_ringbuffer_half_empty_reporting(libusb_device_handle *devh_ctl, uint8_t state);
+int get_fw_major_version(libusb_device_handle *devh_ctl, uint32_t *state);
 
-int get_ringbuffer_half_empty_reporting(libusb_device_handle *devh_ctl, uint8_t *state);
+int get_fw_minor_version(libusb_device_handle *devh_ctl, uint32_t *state);
 
 
 

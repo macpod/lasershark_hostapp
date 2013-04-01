@@ -61,6 +61,9 @@ int laserjack_iso_data_packet_len = 0;
 
 int lasershark_serialnum_len = 64;
 unsigned char lasershark_serialnum[64];
+uint32_t lasershark_fw_major_version = 0;
+uint32_t lasershark_fw_minor_version = 0;
+
 
 uint32_t lasershark_packet_sample_count;
 uint32_t lasershark_samp_element_count;
@@ -350,6 +353,21 @@ int main (int argc, char *argv[])
         goto out_post_release;
     }
 
+    rc = libusb_set_interface_alt_setting(devh_data, 1, 0);
+    if (rc < 0)
+    {
+        fprintf(stderr, "Error setting alternative (ISO) data interface: %d\n", /*libusb_error_name(rc)*/rc);
+        goto out;
+    }
+
+//    // Use the following if you want to use BULK transfers instead of ISO transfers in your hostapp code.
+//    rc = libusb_set_interface_alt_setting(devh_data, 1, 1);
+//    if (rc < 0)
+//    {
+//        fprintf(stderr, "Error setting alternative (BULK) data interface: %d\n", /*libusb_error_name(rc)*/rc);
+//        goto out;
+//    }
+
 
     struct libusb_device_descriptor desc;
 
@@ -367,89 +385,88 @@ int main (int argc, char *argv[])
     printf("iSerialNumber: %s\n", lasershark_serialnum);
 
 
+    rc = get_fw_major_version(devh_ctl, &lasershark_fw_major_version);
+    if (rc != LASERSHARK_CMD_SUCCESS)
+    {
+        printf("Getting FW Major version failed. (Consider upgrading your firmware!)\n");
+        goto out;
+    }
+    printf("Getting FW Major version: %d\n", lasershark_fw_major_version);
+
+    rc = get_fw_minor_version(devh_ctl, &lasershark_fw_minor_version);
+    if (rc != LASERSHARK_CMD_SUCCESS)
+    {
+        printf("Getting FW Minor version failed. (Consider upgrading your firmware!)\n");
+        goto out;
+    }
+    printf("Getting FW Major version: %d\n", lasershark_fw_minor_version);
+
+
+
     max_iso_data_len = libusb_get_max_iso_packet_size(libusb_get_device(devh_data), (4 | LIBUSB_ENDPOINT_OUT));
     printf("Max iso data packet length according to descriptors: %d\n", max_iso_data_len);
 
 
     rc = get_samp_element_count(devh_ctl, &lasershark_samp_element_count);
-    if (rc == LASERSHARK_CMD_SUCCESS)
-    {
-        printf("Getting sample element count: %d\n", lasershark_samp_element_count);
-    }
-    else
+    if (rc != LASERSHARK_CMD_SUCCESS)
     {
         printf("Getting sample element count failed\n");
         goto out;
     }
+    printf("Getting sample element count: %d\n", lasershark_samp_element_count);
 
 
     rc = get_packet_sample_count(devh_ctl, &lasershark_packet_sample_count);
-    if (rc == LASERSHARK_CMD_SUCCESS)
-    {
-        printf("Getting packet sample count: %d\n", lasershark_packet_sample_count);
-    }
-    else
+    if (rc != LASERSHARK_CMD_SUCCESS)
     {
         printf("Getting packet sample count failed\n");
         goto out;
     }
+    printf("Getting packet sample count: %d\n", lasershark_packet_sample_count);
 
 
     rc = get_max_ilda_rate(devh_ctl, &lasershark_max_ilda_rate);
-    if (rc == LASERSHARK_CMD_SUCCESS)
-    {
-        printf("Getting max ilda rate: %u pps\n", lasershark_max_ilda_rate);
-    }
-    else
+    if (rc != LASERSHARK_CMD_SUCCESS)
     {
         printf("Getting max ilda rate failed\n");
         goto out;
     }
+    printf("Getting max ilda rate: %u pps\n", lasershark_max_ilda_rate);
 
 
     rc = get_dac_min(devh_ctl, &lasershark_dac_min_val);
-    if (rc == LASERSHARK_CMD_SUCCESS)
-    {
-        printf("Getting dac min: %d\n", lasershark_dac_min_val);
-    }
-    else
+    if (rc != LASERSHARK_CMD_SUCCESS)
     {
         printf("Getting dac min failed\n");
         goto out;
     }
+    printf("Getting dac min: %d\n", lasershark_dac_min_val);
+
 
     rc = get_dac_max(devh_ctl, &lasershark_dac_max_val);
-    if (rc == LASERSHARK_CMD_SUCCESS)
-    {
-        printf("getting dac max: %d\n", lasershark_dac_max_val);
-    }
-    else
-    {
+    if (rc != LASERSHARK_CMD_SUCCESS) {
         printf("Getting dac max failed\n");
         goto out;
     }
+    printf("getting dac max: %d\n", lasershark_dac_max_val);
+
 
     rc = get_ringbuffer_sample_count(devh_ctl, &lasershark_ringbuffer_sample_count);
-    if (rc == LASERSHARK_CMD_SUCCESS)
+    if (rc != LASERSHARK_CMD_SUCCESS)
     {
-        printf("Getting ringbuffer sample count: %d\n", lasershark_ringbuffer_sample_count);
-    }
-    else
-    {
-        printf("Getting ringbuffer sample count failed\n");
+        printf("Getting ringbuffer sample count\n");
         goto out;
     }
+    printf("Getting ringbuffer sample count: %d\n", lasershark_ringbuffer_sample_count);
+
 
     rc = get_ringbuffer_empty_sample_count(devh_ctl, &temp);
-    if (rc == LASERSHARK_CMD_SUCCESS)
+    if (rc != LASERSHARK_CMD_SUCCESS)
     {
-        printf("Getting ringbuffer empty sample count: %d\n", temp);
+        printf("Getting ringbuffer empty sample count failed. (Consider upgrading your firmware)\n");
     }
-    else
-    {
-        printf("Getting ringbuffer empty sample count failed\n");
-        goto out;
-    }
+    printf("Getting ringbuffer empty sample count: %d\n", temp);
+
 
     jack_status_t jack_status;
     jack_options_t  jack_options = JackNullOption;
@@ -479,26 +496,22 @@ int main (int argc, char *argv[])
     }
 
     rc = set_ilda_rate(devh_ctl, lasershark_ilda_rate);
-    if (rc == LASERSHARK_CMD_SUCCESS)
-    {
-        printf("Setting ILDA rate worked: %u pps\n", lasershark_ilda_rate);
-    }
-    else
+    if (rc != LASERSHARK_CMD_SUCCESS)
     {
         printf("setting ILDA rate failed\n");
         goto out;
     }
+    printf("Setting ILDA rate worked: %u pps\n", lasershark_ilda_rate);
+
 
     rc = set_output(devh_ctl, LASERSHARK_CMD_OUTPUT_ENABLE);
-    if (rc == LASERSHARK_CMD_SUCCESS)
-    {
-        printf("Enable output worked\n");
-    }
-    else
+    if (rc != LASERSHARK_CMD_SUCCESS)
     {
         printf("Enable output failed\n");
         goto out;
     }
+    printf("Enable output worked\n");
+
 
     laserjack_iso_data_packet_len = lasershark_packet_sample_count * lasershark_samp_element_count * sizeof(uint16_t);
     laserjack_iso_data_packet_buf = malloc(laserjack_iso_data_packet_len);
