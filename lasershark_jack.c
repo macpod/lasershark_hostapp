@@ -30,6 +30,7 @@ along with Lasershark. If not, see <http://www.gnu.org/licenses/>.
 #include <signal.h>
 #include <time.h>
 #include "lasershark_lib.h"
+#include "lasershark_3d_printer_lib.h"
 
 
 #define LASERSHARK_VIN 0x1fc9

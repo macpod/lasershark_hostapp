@@ -27,7 +27,7 @@ along with Lasershark. If not, see <http://www.gnu.org/licenses/>.
 
 
 // Helper function
-static int get_uint8(libusb_device_handle *devh_ctl, uint8_t command, uint8_t *val)
+int lasershark_get_uint8(libusb_device_handle *devh_ctl, uint8_t command, uint8_t *val)
 {
     unsigned char data[64];
     int r, actual;
@@ -52,7 +52,7 @@ static int get_uint8(libusb_device_handle *devh_ctl, uint8_t command, uint8_t *v
 
 
 // Helper function
-static int get_uint32(libusb_device_handle *devh_ctl, uint8_t command, uint32_t *val)
+int lasershark_get_uint32(libusb_device_handle *devh_ctl, uint8_t command, uint32_t *val)
 {
     unsigned char data[64];
     int r, actual;
@@ -77,7 +77,7 @@ static int get_uint32(libusb_device_handle *devh_ctl, uint8_t command, uint32_t 
 }
 
 
-static int set_uint8(libusb_device_handle *devh_ctl, uint8_t command, uint8_t val)
+int lasershark_set_uint8(libusb_device_handle *devh_ctl, uint8_t command, uint8_t val)
 {
     unsigned char data[64];
     int r, actual;
@@ -100,7 +100,7 @@ static int set_uint8(libusb_device_handle *devh_ctl, uint8_t command, uint8_t va
     return LASERSHARK_CMD_SUCCESS;
 }
 
-static int set_uint32(libusb_device_handle *devh_ctl, uint8_t command, uint32_t val)
+int lasershark_set_uint32(libusb_device_handle *devh_ctl, uint8_t command, uint32_t val)
 {
     unsigned char data[64];
     int r, actual;
@@ -128,86 +128,86 @@ static int set_uint32(libusb_device_handle *devh_ctl, uint8_t command, uint32_t 
 // Returns LASERSHARK_CMD_SUCCESS on success, LASERSHARK_CMD_FAIL on failure.
 int set_output(libusb_device_handle *devh_ctl, uint8_t state)
 {
-    return set_uint8(devh_ctl, LASERSHARK_CMD_SET_OUTPUT, state);
+    return lasershark_set_uint8(devh_ctl, LASERSHARK_CMD_SET_OUTPUT, state);
 }
 
 
 // Returns LASERSHARK_CMD_SUCCESS on success, LASERSHARK_CMD_FAIL on failure.
 int get_output(libusb_device_handle *devh_ctl, uint8_t *state)
 {
-    return get_uint8(devh_ctl, LASERSHARK_CMD_GET_OUTPUT, state);
+    return lasershark_get_uint8(devh_ctl, LASERSHARK_CMD_GET_OUTPUT, state);
 }
 
 
 // Returns LASERSHARK_CMD_SUCCESS on success, LASERSHARK_CMD_FAIL on failure.
 int set_ilda_rate(libusb_device_handle *devh_ctl, uint32_t rate)
 {
-    return set_uint32(devh_ctl, LASERSHARK_CMD_SET_ILDA_RATE, rate);
+    return lasershark_set_uint32(devh_ctl, LASERSHARK_CMD_SET_ILDA_RATE, rate);
 }
 
 
 // Returns LASERSHARK_CMD_SUCCESS on success, LASERSHARK_CMD_FAIL on failure.
 int get_ilda_rate(libusb_device_handle *devh_ctl, uint32_t *rate)
 {
-    return get_uint32(devh_ctl, LASERSHARK_CMD_GET_ILDA_RATE, rate);
+    return lasershark_get_uint32(devh_ctl, LASERSHARK_CMD_GET_ILDA_RATE, rate);
 }
 
 
 // Returns LASERSHARK_CMD_SUCCESS on success, LASERSHARK_CMD_FAIL on failure.
 int get_max_ilda_rate(libusb_device_handle *devh_ctl, uint32_t *rate)
 {
-    return get_uint32(devh_ctl, LASERSHARK_CMD_GET_MAX_ILDA_RATE, rate);
+    return lasershark_get_uint32(devh_ctl, LASERSHARK_CMD_GET_MAX_ILDA_RATE, rate);
 }
 
 
 // Returns LASERSHARK_CMD_SUCCESS on success, LASERSHARK_CMD_FAIL on failure.
 int get_samp_element_count(libusb_device_handle *devh_ctl, uint32_t *samp_element_count)
 {
-    return get_uint32(devh_ctl, LASERSHARK_CMD_GET_SAMP_ELEMENT_COUNT, samp_element_count);
+    return lasershark_get_uint32(devh_ctl, LASERSHARK_CMD_GET_SAMP_ELEMENT_COUNT, samp_element_count);
 }
 
 
 // Returns LASERSHARK_CMD_SUCCESS on success, LASERSHARK_CMD_FAIL on failure.
 int get_packet_sample_count(libusb_device_handle *devh_ctl, uint32_t *packet_sample_count)
 {
-    return get_uint32(devh_ctl, LASERSHARK_CMD_GET_PACKET_SAMP_COUNT, packet_sample_count);
+    return lasershark_get_uint32(devh_ctl, LASERSHARK_CMD_GET_PACKET_SAMP_COUNT, packet_sample_count);
 }
 
 // Returns LASERSHARK_CMD_SUCCESS on success, LASERSHARK_CMD_FAIL on failure.
 int get_dac_min(libusb_device_handle *devh_ctl, uint32_t *dac_min)
 {
 
-    return get_uint32(devh_ctl, LASERSHARK_CMD_GET_DAC_MIN, dac_min);
+    return lasershark_get_uint32(devh_ctl, LASERSHARK_CMD_GET_DAC_MIN, dac_min);
 }
 
 // Returns LASERSHARK_CMD_SUCCESS on success, LASERSHARK_CMD_FAIL on failure.
 int get_dac_max(libusb_device_handle *devh_ctl, uint32_t *dac_max)
 {
-    return get_uint32(devh_ctl, LASERSHARK_CMD_GET_DAC_MAX, dac_max);
+    return lasershark_get_uint32(devh_ctl, LASERSHARK_CMD_GET_DAC_MAX, dac_max);
 
 }
 
 // Returns LASERSHARK_CMD_SUCCESS on success, LASERSHARK_CMD_FAIL on failure.
 int get_ringbuffer_sample_count(libusb_device_handle *devh_ctl, uint32_t *ringbuffer_sample_count)
 {
-    return get_uint32(devh_ctl, LASERSHARK_CMD_GET_RINGBUFFER_SAMPLE_COUNT, ringbuffer_sample_count);
+    return lasershark_get_uint32(devh_ctl, LASERSHARK_CMD_GET_RINGBUFFER_SAMPLE_COUNT, ringbuffer_sample_count);
 }
 
 // Returns LASERSHARK_CMD_SUCCESS on success, LASERSHARK_CMD_FAIL on failure.
 int get_ringbuffer_empty_sample_count(libusb_device_handle *devh_ctl, uint32_t *ringbuffer_empty_sample_count)
 {
-    return get_uint32(devh_ctl, LASERSHARK_CMD_GET_RINGBUFFER_EMPTY_SAMPLE_COUNT, ringbuffer_empty_sample_count);
+    return lasershark_get_uint32(devh_ctl, LASERSHARK_CMD_GET_RINGBUFFER_EMPTY_SAMPLE_COUNT, ringbuffer_empty_sample_count);
 }
 
 // Returns LASERSHARK_CMD_SUCCESS on success, LASERSHARK_CMD_FAIL on failure.
 int get_fw_major_version(libusb_device_handle *devh_ctl, uint32_t *fw_version_major)
 {
-    return get_uint32(devh_ctl, LASERSHARK_CMD_GET_LASERSHARK_FW_MAJOR_VERSION, fw_version_major);
+    return lasershark_get_uint32(devh_ctl, LASERSHARK_CMD_GET_LASERSHARK_FW_MAJOR_VERSION, fw_version_major);
 }
 
 // Returns LASERSHARK_CMD_SUCCESS on success, LASERSHARK_CMD_FAIL on failure.
 int get_fw_minor_version(libusb_device_handle *devh_ctl, uint32_t *fw_version_minor)
 {
-    return get_uint32(devh_ctl, LASERSHARK_GMD_GET_LASERSHARK_FW_MINOR_VERSION, fw_version_minor);
+    return lasershark_get_uint32(devh_ctl, LASERSHARK_GMD_GET_LASERSHARK_FW_MINOR_VERSION, fw_version_minor);
 }
 

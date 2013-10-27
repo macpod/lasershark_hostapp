@@ -79,7 +79,10 @@ To computer:
 
 */
 
-
+int lasershark_get_uint8(libusb_device_handle *devh_ctl, uint8_t command, uint8_t *val);
+int lasershark_get_uint32(libusb_device_handle *devh_ctl, uint8_t command, uint32_t *val);
+int lasershark_set_uint8(libusb_device_handle *devh_ctl, uint8_t command, uint8_t val);
+int lasershark_set_uint32(libusb_device_handle *devh_ctl, uint8_t command, uint32_t val);
 
 int set_output(libusb_device_handle *devh_ctl, uint8_t state);
 
