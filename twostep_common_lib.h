@@ -43,87 +43,70 @@ along with Lasershark. If not, see <http://www.gnu.org/licenses/>.
 
 
 #define TWOSTEP_SET_STEPS 0x10
-//stepper_set_steps(uint8_t stepper_num, uint32_t steps);
 #define TWOSTEP_SET_STEPS_CMD_LEN 9
 #define TWOSTEP_SET_STEPS_RESP_LEN 5
 
 #define TWOSTEP_SET_SAFE_STEPS 0x11
-//stepper_set_safe_steps(uint8_t stepper_number, uint32_t steps);
 #define TWOSTEP_SET_SAFE_STEPS_CMD_LEN 9
 #define TWOSTEP_SET_SAFE_STEPS_RESP_LEN 5
 
 #define TWOSTEP_SET_STEP_UNTIL_RELAY 0x12
-// stepper_set_step_until_relay(uint8_t stepper_num);
 #define TWOSTEP_SET_STEP_UNTIL_RELAY_CMD_LEN 5
 #define TWOSTEP_SET_STEP_UNTIL_RELAY_RESP_LEN 5
 
 #define TWOSTEP_START 0x13
-// stepper_start(uint8_t stepper_bitfield);
 #define TWOSTEP_START_CMD_LEN 5
 #define TWOSTEP_START_RESP_LEN 5
 
 #define TWOSTEP_STOP 0x14
-// stepper_stop(uint8_t stepper_bitfield);
 #define TWOSTEP_STOP_CMD_LEN 5
 #define TWOSTEP_STOP_RESP_LEN 5
 
 #define TWOSTEP_GET_IS_MOVING 0x15
-// stepper_get_moving(uint8_t stepper_num, uint8_t is_moving);
 #define TWOSTEP_GET_IS_MOVING_CMD_LEN 5
 #define TWOSTEP_GET_IS_MOVING_RESP_LEN 6
 
 #define TWOSTEP_SET_ENABLE 0x16
-//  stepper_set_enable(uint8_t stepper_num, uint8_t enable);
 #define TWOSTEP_SET_ENABLE_CMD_LEN 6
 #define TWOSTEP_SET_ENABLE_RESP_LEN 5
 
 #define TWOSTEP_GET_ENABLE 0x17
-// stepper_get_enable(uint8_t stepper_num, uint8_t *enable);
 #define TWOSTEP_GET_ENABLE_CMD_LEN 5
 #define TWOSTEP_GET_ENABLE_RESP_LEN 6
 
 #define TWOSTEP_SET_MICROSTEPS 0x18
-//  stepper_set_microsteps(uint8_t stepper_num, uint8_t steppers_microstep_setting stepper_microsteps);
 #define TWOSTEP_SET_MICROSTEPS_CMD_LEN 6
 #define TWOSTEP_SET_MICROSTEPS_RESP_LEN 5
 
 #define TWOSTEP_GET_MICROSTEPS 0x19
-// stepper_get_microsteps(uint8_t stepper_num, enum steppers_microstep_setting *stepper_microsteps);
 #define TWOSTEP_GET_MICROSTEPS_CMD_LEN 5
 #define TWOSTEP_GET_MICROSTEPS_RESP_LEN 6
 
 #define TWOSTEP_SET_DIR 0x1a
-// stepper_set_dir(uint8_t stepper_num, uint8_t dir);
 #define TWOSTEP_SET_DIR_CMD_LEN 6
 #define TWOSTEP_SET_DIR_RESP_LEN 5
 
 #define TWOSTEP_GET_DIR 0x1b
-// stepper_get_dir(uint8_t stepper_num, uint8_t *dir);
 #define TWOSTEP_GET_DIR_CMD_LEN 5
 #define TWOSTEP_GET_DIR_RESP_LEN 6
 
 #define TWOSTEP_SET_CURRENT 0x1c
-// stepper_set_current(uint8_t stepper_num, uint16_t val);
 #define TWOSTEP_SET_CURRENT_CMD_LEN 7
 #define TWOSTEP_SET_CURRENT_RESP_LEN 5
 
 #define TWOSTEP_GET_CURRENT 0x1d
-// stepper_get_current(uint8_t stepper_num, uint16_t *val);
 #define TWOSTEP_GET_CURRENT_CMD_LEN 5
 #define TWOSTEP_GET_CURRENT_RESP_LEN 7
 
 #define TWOSTEP_SET_100US_DELAY 0x1e
-// stepper_set_100uS_delay(uint8_t stepper_num, uint16_t val);
 #define TWOSTEP_SET_100US_DELAY_CMD_LEN 7
 #define TWOSTEP_SET_100US_DELAY_RESP_LEN 5
 
 #define TWOSTEP_GET_100US_DELAY 0x1f
-// stepper_get_100uS_delay(uint8_t stepper_num, uint16_t *val);
 #define TWOSTEP_GET_100US_DELAY_CMD_LEN 5
 #define TWOSTEP_GET_100US_DELAY_RESP_LEN 7
 
 #define TWOSTEP_GET_RELAY_STATUS 0x30
-// uint8_t get_relay_status();
 #define TWOSTEP_GET_RELAY_STATUS_CMD_LEN 4
 #define TWOSTEP_GET_RELAY_STATUS_RESP_LEN 6
 
