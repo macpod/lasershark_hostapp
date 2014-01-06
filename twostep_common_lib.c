@@ -34,8 +34,8 @@ uint8_t twostep_cmd_len(uint8_t cmd)
     case TWOSTEP_SET_SAFE_STEPS:
         res = TWOSTEP_SET_SAFE_STEPS_CMD_LEN;
         break;
-    case TWOSTEP_SET_STEP_UNTIL_RELAY:
-        res = TWOSTEP_SET_STEP_UNTIL_RELAY_CMD_LEN;
+    case TWOSTEP_SET_STEP_UNTIL_SWITCH:
+        res = TWOSTEP_SET_STEP_UNTIL_SWITCH_CMD_LEN;
         break;
     case TWOSTEP_START:
         res = TWOSTEP_START_CMD_LEN;
@@ -76,8 +76,8 @@ uint8_t twostep_cmd_len(uint8_t cmd)
     case TWOSTEP_GET_100US_DELAY:
         res = TWOSTEP_GET_100US_DELAY_CMD_LEN;
         break;
-    case TWOSTEP_GET_RELAY_STATUS:
-        res = TWOSTEP_GET_RELAY_STATUS_CMD_LEN;
+    case TWOSTEP_GET_SWITCH_STATUS:
+        res = TWOSTEP_GET_SWITCH_STATUS_CMD_LEN;
         break;
     case TWOSTEP_GET_VERSION:
         res = TWOSTEP_GET_VERSION_CMD_LEN;
@@ -98,8 +98,8 @@ uint8_t twostep_resp_len(uint8_t cmd)
     case TWOSTEP_SET_SAFE_STEPS:
         res = TWOSTEP_SET_SAFE_STEPS_RESP_LEN;
         break;
-    case TWOSTEP_SET_STEP_UNTIL_RELAY:
-        res = TWOSTEP_SET_STEP_UNTIL_RELAY_RESP_LEN;
+    case TWOSTEP_SET_STEP_UNTIL_SWITCH:
+        res = TWOSTEP_SET_STEP_UNTIL_SWITCH_RESP_LEN;
         break;
     case TWOSTEP_START:
         res = TWOSTEP_START_RESP_LEN;
@@ -140,8 +140,8 @@ uint8_t twostep_resp_len(uint8_t cmd)
     case TWOSTEP_GET_100US_DELAY:
         res = TWOSTEP_GET_100US_DELAY_RESP_LEN;
         break;
-    case TWOSTEP_GET_RELAY_STATUS:
-        res = TWOSTEP_GET_RELAY_STATUS_RESP_LEN;
+    case TWOSTEP_GET_SWITCH_STATUS:
+        res = TWOSTEP_GET_SWITCH_STATUS_RESP_LEN;
         break;
     case TWOSTEP_GET_VERSION:
         res = TWOSTEP_GET_VERSION_RESP_LEN;

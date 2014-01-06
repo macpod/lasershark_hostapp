@@ -133,11 +133,11 @@ int ls_ub_twostep_set_safe_steps(libusb_device_handle *devh_ub, uint8_t stepper_
 }
 
 
-int ls_ub_twostep_set_step_until_relay(libusb_device_handle *devh_ub, uint8_t stepper_num)
+int ls_ub_twostep_set_step_until_switch(libusb_device_handle *devh_ub, uint8_t stepper_num)
 {
     int res;
     uint8_t buf[TWOSTEP_BUF_SIZE];
-    uint8_t len = twostep_cmd_set_step_until_relay(buf, stepper_num);
+    uint8_t len = twostep_cmd_set_step_until_switch(buf, stepper_num);
     res = ls_ub_twostep_cmd_send_helper(devh_ub, buf, len);
 
     return res;
@@ -336,16 +336,16 @@ uint8_t ls_ub_twostep_get_100uS_delay(libusb_device_handle *devh_ub, uint8_t ste
 }
 
 
-uint8_t ls_ub_twostep_get_relay_status(libusb_device_handle *devh_ub, uint8_t *relay_bitfield)
+uint8_t ls_ub_twostep_get_switch_status(libusb_device_handle *devh_ub, uint8_t *switch_bitfield)
 {
     int res;
     uint8_t buf[TWOSTEP_BUF_SIZE];
-    uint8_t len = twostep_cmd_get_relay_status(buf);
+    uint8_t len = twostep_cmd_get_switch_status(buf);
     uint8_t u8_temp = 0;
     res = ls_ub_twostep_cmd_send_helper(devh_ub, buf, len);
     if (res == LS_UB_TWOSTEP_SUCCESS) {
-        if (twostep_resp_get_relay_status(buf, &u8_temp)) {
-            *relay_bitfield = u8_temp;
+        if (twostep_resp_get_switch_status(buf, &u8_temp)) {
+            *switch_bitfield = u8_temp;
         } else {
             res = LS_UB_TWOSTEP_TS_PROTO_FAIL;
         }

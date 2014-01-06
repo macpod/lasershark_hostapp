@@ -82,7 +82,7 @@ void tests()
     bool high;
     uint16_t current;
     uint16_t delay;
-    uint8_t relays;
+    uint8_t switches;
     uint8_t version;
 
 
@@ -122,10 +122,10 @@ void tests()
     sleep(1);
 
 
-    if (LS_UB_TWOSTEP_SUCCESS != ls_ub_twostep_set_step_until_relay(devh_ub, TWOSTEP_STEPPER_1)) {
-        printf("set step until relay cmd failed\n");
+    if (LS_UB_TWOSTEP_SUCCESS != ls_ub_twostep_set_step_until_switch(devh_ub, TWOSTEP_STEPPER_1)) {
+        printf("set step until switch cmd failed\n");
     } else {
-        printf("set step until relay cmd passed\n");
+        printf("set step until switch cmd passed\n");
     }
     printf("\n");
     sleep(1);
@@ -206,10 +206,10 @@ void tests()
 
 
 
-    if (LS_UB_TWOSTEP_SUCCESS != ls_ub_twostep_get_relay_status(devh_ub, &relays)) {
-        printf("get relay status cmd failed\n");
+    if (LS_UB_TWOSTEP_SUCCESS != ls_ub_twostep_get_switch_status(devh_ub, &switches)) {
+        printf("get switch status cmd failed\n");
     } else {
-        printf("get relay status cmd passed. relay val is: %02x\n", relays);
+        printf("get switch status cmd passed. switch val is: %02x\n", switches);
     }
     printf("\n");
     sleep(1);

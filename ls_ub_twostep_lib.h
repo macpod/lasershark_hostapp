@@ -42,7 +42,7 @@ along with Lasershark. If not, see <http://www.gnu.org/licenses/>.
 
 int ls_ub_twostep_set_steps(libusb_device_handle *devh_ub, uint8_t stepper_num, uint32_t steps);
 int ls_ub_twostep_set_safe_steps(libusb_device_handle *devh_ub, uint8_t stepper_num, uint32_t steps);
-int ls_ub_twostep_set_step_until_relay(libusb_device_handle *devh_ub, uint8_t stepper_num);
+int ls_ub_twostep_set_step_until_switch(libusb_device_handle *devh_ub, uint8_t stepper_num);
 
 int ls_ub_twostep_start(libusb_device_handle *devh_ub, uint8_t stepper_bitfield);
 int ls_ub_twostep_stop(libusb_device_handle *devh_ub, uint8_t stepper_bitfield);
@@ -64,7 +64,7 @@ uint8_t ls_ub_twostep_get_current(libusb_device_handle *devh_ub, uint8_t stepper
 uint8_t ls_ub_twostep_set_100uS_delay(libusb_device_handle *devh_ub, uint8_t stepper_num, uint16_t delay);
 uint8_t ls_ub_twostep_get_100uS_delay(libusb_device_handle *devh_ub, uint8_t stepper_num, uint16_t *delay);
 
-uint8_t ls_ub_twostep_get_relay_status(libusb_device_handle *devh_ub, uint8_t *relay_bitfield);
+uint8_t ls_ub_twostep_get_switch_status(libusb_device_handle *devh_ub, uint8_t *switch_bitfield);
 
 uint8_t ls_ub_twostep_get_version(libusb_device_handle *devh_ub, uint8_t *version);
 

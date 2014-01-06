@@ -63,11 +63,11 @@ uint8_t twostep_cmd_set_safe_steps(uint8_t *buf, uint8_t stepper_num, uint32_t s
 }
 
 
-uint8_t twostep_cmd_set_step_until_relay(uint8_t *buf, uint8_t stepper_num)
+uint8_t twostep_cmd_set_step_until_switch(uint8_t *buf, uint8_t stepper_num)
 {
     int i = 1;
     twostep_insert_start_token(buf);
-    buf[i++] = TWOSTEP_SET_STEP_UNTIL_RELAY;
+    buf[i++] = TWOSTEP_SET_STEP_UNTIL_SWITCH;
     buf[i++] = stepper_num;
     twostep_insert_cmd_end_tokens(buf);
     i+=2;
@@ -259,11 +259,11 @@ uint8_t twostep_cmd_get_100uS_delay(uint8_t *buf, uint8_t stepper_num)
 }
 
 
-uint8_t twostep_cmd_get_relay_status(uint8_t *buf)
+uint8_t twostep_cmd_get_switch_status(uint8_t *buf)
 {
     int i = 1;
     twostep_insert_start_token(buf);
-    buf[i++] = TWOSTEP_GET_RELAY_STATUS;
+    buf[i++] = TWOSTEP_GET_SWITCH_STATUS;
     twostep_insert_cmd_end_tokens(buf);
     i+=2;
     return i;
@@ -392,19 +392,19 @@ bool twostep_resp_get_100uS_delay(uint8_t *buf,uint16_t *delay)
 }
 
 
-bool twostep_resp_get_relay_status(uint8_t *buf, uint8_t *relay_bitfield)
+bool twostep_resp_get_switch_status(uint8_t *buf, uint8_t *switch_bitfield)
 {
     int i = 3;
     bool res = true;
     uint8_t u8_temp;
-    if (buf[1] != TWOSTEP_GET_RELAY_STATUS) {
+    if (buf[1] != TWOSTEP_GET_SWITCH_STATUS) {
         res = false;
     }
 
     if (res) {
         u8_temp = buf[i++];
-        if ((u8_temp & TWOSTEP_RELAYS_GC) == u8_temp) {
-            *relay_bitfield = u8_temp;
+        if ((u8_temp & TWOSTEP_SWITCHES_GC) == u8_temp) {
+            *switch_bitfield = u8_temp;
         } else {
             res = false;
         }

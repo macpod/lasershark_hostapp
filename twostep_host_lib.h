@@ -35,7 +35,7 @@ bool twostep_resp_indicates_passed(uint8_t *resp_buf, uint8_t len);
 // They all return the size of the cmd buf.
 uint8_t twostep_cmd_set_steps(uint8_t *buf, uint8_t stepper_num, uint32_t steps);
 uint8_t twostep_cmd_set_safe_steps(uint8_t *buf, uint8_t stepper_num, uint32_t steps);
-uint8_t twostep_cmd_set_step_until_relay(uint8_t *buf, uint8_t stepper_num);
+uint8_t twostep_cmd_set_step_until_switch(uint8_t *buf, uint8_t stepper_num);
 
 uint8_t twostep_cmd_start(uint8_t *buf, uint8_t stepper_bitfield);
 uint8_t twostep_cmd_stop(uint8_t *buf, uint8_t stepper_bitfield);
@@ -57,7 +57,7 @@ uint8_t twostep_cmd_get_current(uint8_t *buf, uint8_t stepper_num);
 uint8_t twostep_cmd_set_100uS_delay(uint8_t *buf, uint8_t stepper_num, uint16_t delay);
 uint8_t twostep_cmd_get_100uS_delay(uint8_t *buf, uint8_t stepper_num);
 
-uint8_t twostep_cmd_get_relay_status(uint8_t *buf);
+uint8_t twostep_cmd_get_switch_status(uint8_t *buf);
 
 uint8_t twostep_cmd_get_version(uint8_t *buf);
 
@@ -70,7 +70,7 @@ bool twostep_resp_get_microsteps(uint8_t *buf,uint8_t *microstep_bitfield);
 bool twostep_resp_get_dir(uint8_t *buf,uint8_t *high);
 bool twostep_resp_get_current(uint8_t *buf,uint16_t *current);
 bool twostep_resp_get_100uS_delay(uint8_t *buf, uint16_t *delay);
-bool twostep_resp_get_relay_status(uint8_t *buf, uint8_t *relays);
+bool twostep_resp_get_switch_status(uint8_t *buf, uint8_t *switches);
 bool twostep_resp_get_version(uint8_t *buf, uint8_t *version);
 
 #endif
