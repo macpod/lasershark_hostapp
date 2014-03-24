@@ -63,10 +63,12 @@ along with Lasershark. If not, see <http://www.gnu.org/licenses/>.
 
 // Version Info
 #define LASERSHARK_FW_MAJOR_VERSION 2
-#define LASERSHARK_FW_MINOR_VERSION 1
+#define LASERSHARK_FW_MINOR_VERSION 2
 #define LASERSHARK_CMD_GET_LASERSHARK_FW_MAJOR_VERSION 0X8B
 #define LASERSHARK_GMD_GET_LASERSHARK_FW_MINOR_VERSION 0X8C
 
+// Clears ring buffer
+#define LASERSHARK_CMD_CLEAR_RINGBUFFER 0x8D
 
 
 /*
@@ -106,6 +108,8 @@ int get_ringbuffer_empty_sample_count(libusb_device_handle *devh_ctl, uint32_t *
 int get_fw_major_version(libusb_device_handle *devh_ctl, uint32_t *state);
 
 int get_fw_minor_version(libusb_device_handle *devh_ctl, uint32_t *state);
+
+int clear_ringbuffer(libusb_device_handle *devh_ctl);
 
 
 

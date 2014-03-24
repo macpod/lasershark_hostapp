@@ -211,3 +211,8 @@ int get_fw_minor_version(libusb_device_handle *devh_ctl, uint32_t *fw_version_mi
     return get_uint32(devh_ctl, LASERSHARK_GMD_GET_LASERSHARK_FW_MINOR_VERSION, fw_version_minor);
 }
 
+int clear_ringbuffer(libusb_device_handle *devh_ctl)
+{
+    return set_uint8(devh_ctl, LASERSHARK_CMD_CLEAR_RINGBUFFER, 0); // Value doesn't matter here.
+}
+
