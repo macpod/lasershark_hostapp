@@ -399,18 +399,18 @@ int main (int argc, char *argv[])
         printf("Getting FW Minor version failed. (Consider upgrading your firmware!)\n");
         goto out;
     }
-    printf("Getting FW Major version: %d\n", lasershark_fw_minor_version);
+    printf("Getting FW Minor version: %d\n", lasershark_fw_minor_version);
 
-	if (lasershark_fw_minor_version != LASERSHARK_FW_MAJOR_VERSION) {
-		printf("Your FW is not capable of proper bulk transfers or clear commands. Consider upgrading your firmware!\n");
-	} else {
-    	printf("Firmware supports ring buffer clears. Clearing now.\n");
-		rc = clear_ringbuffer(devh_ctl);
-		if (rc != LASERSHARK_CMD_SUCCESS) {
-	        printf("Clearing ringbuffer buffer failed.\n");
-			goto out; 
-		}
-	}
+    if (lasershark_fw_minor_version != LASERSHARK_FW_MAJOR_VERSION) {
+        printf("Your FW is not capable of proper bulk transfers or clear commands. Consider upgrading your firmware!\n");
+    } else {
+        printf("Firmware supports ring buffer clears. Clearing now.\n");
+        rc = clear_ringbuffer(devh_ctl);
+        if (rc != LASERSHARK_CMD_SUCCESS) {
+            printf("Clearing ringbuffer buffer failed.\n");
+            goto out; 
+        }
+    }
 
     max_iso_data_len = libusb_get_max_iso_packet_size(libusb_get_device(devh_data), (4 | LIBUSB_ENDPOINT_OUT));
     printf("Max iso data packet length according to descriptors: %d\n", max_iso_data_len);
