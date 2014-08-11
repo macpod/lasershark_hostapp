@@ -70,6 +70,8 @@ along with Lasershark. If not, see <http://www.gnu.org/licenses/>.
 // Clears ring buffer
 #define LASERSHARK_CMD_CLEAR_RINGBUFFER 0x8D
 
+// Get number of ilda samples that can be transmitter per bulk packet.
+#define LASERSHARK_CMD_GET_BULK_PACKET_SAMP_COUNT 0x8E
 
 /*
 Packet format
@@ -95,7 +97,9 @@ int get_max_ilda_rate(libusb_device_handle *devh_ctl, uint32_t *rate);
 
 int get_samp_element_count(libusb_device_handle *devh_ctl, uint32_t *packet_sample_count);
 
-int get_packet_sample_count(libusb_device_handle *devh_ctl, uint32_t *packet_sample_count);
+int get_iso_packet_sample_count(libusb_device_handle *devh_ctl, uint32_t *packet_sample_count);
+
+int get_bulk_packet_sample_count(libusb_device_handle *devh_ctl, uint32_t *packet_sample_count);
 
 int get_dac_min(libusb_device_handle *devh_ctl, uint32_t *dac_min);
 

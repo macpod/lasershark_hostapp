@@ -168,7 +168,13 @@ int get_samp_element_count(libusb_device_handle *devh_ctl, uint32_t *samp_elemen
 
 
 // Returns LASERSHARK_CMD_SUCCESS on success, LASERSHARK_CMD_FAIL on failure.
-int get_packet_sample_count(libusb_device_handle *devh_ctl, uint32_t *packet_sample_count)
+int get_iso_packet_sample_count(libusb_device_handle *devh_ctl, uint32_t *packet_sample_count)
+{
+    return get_uint32(devh_ctl, LASERSHARK_CMD_GET_PACKET_SAMP_COUNT, packet_sample_count);
+}
+
+// Returns LASERSHARK_CMD_SUCCESS on success, LASERSHARK_CMD_FAIL on failure.
+int get_bulk_packet_sample_count(libusb_device_handle *devh_ctl, uint32_t *packet_sample_count)
 {
     return get_uint32(devh_ctl, LASERSHARK_CMD_GET_PACKET_SAMP_COUNT, packet_sample_count);
 }

@@ -65,7 +65,7 @@ uint32_t lasershark_fw_major_version = 0;
 uint32_t lasershark_fw_minor_version = 0;
 
 
-uint32_t lasershark_packet_sample_count;
+uint32_t lasershark_iso_packet_sample_count;
 uint32_t lasershark_samp_element_count;
 uint32_t lasershark_max_ilda_rate;
 uint32_t lasershark_dac_min_val;
@@ -360,15 +360,6 @@ int main (int argc, char *argv[])
         goto out;
     }
 
-//    // Use the following if you want to use BULK transfers instead of ISO transfers in your hostapp code.
-//    rc = libusb_set_interface_alt_setting(devh_data, 1, 1);
-//    if (rc < 0)
-//    {
-//        fprintf(stderr, "Error setting alternative (BULK) data interface: %d\n", /*libusb_error_name(rc)*/rc);
-//        goto out;
-//    }
-
-
     struct libusb_device_descriptor desc;
 
     rc = libusb_get_device_descriptor(libusb_get_device(devh_ctl), &desc);
@@ -425,13 +416,13 @@ int main (int argc, char *argv[])
     printf("Getting sample element count: %d\n", lasershark_samp_element_count);
 
 
-    rc = get_packet_sample_count(devh_ctl, &lasershark_packet_sample_count);
+    rc = get_iso_packet_sample_count(devh_ctl, &lasershark_iso_packet_sample_count);
     if (rc != LASERSHARK_CMD_SUCCESS)
     {
-        printf("Getting packet sample count failed\n");
+        printf("Getting iso packet sample count failed\n");
         goto out;
     }
-    printf("Getting packet sample count: %d\n", lasershark_packet_sample_count);
+    printf("Getting iso packet sample count: %d\n", lasershark_iso_packet_sample_count);
 
 
     rc = get_max_ilda_rate(devh_ctl, &lasershark_max_ilda_rate);
@@ -522,7 +513,7 @@ int main (int argc, char *argv[])
     printf("Enable output worked\n");
 
 
-    laserjack_iso_data_packet_len = lasershark_packet_sample_count * lasershark_samp_element_count * sizeof(uint16_t);
+    laserjack_iso_data_packet_len = lasershark_iso_packet_sample_count * lasershark_samp_element_count * sizeof(uint16_t);
     laserjack_iso_data_packet_buf = malloc(laserjack_iso_data_packet_len);
     if (laserjack_iso_data_packet_buf == NULL)
     {
