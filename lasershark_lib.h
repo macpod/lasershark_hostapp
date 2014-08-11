@@ -47,7 +47,7 @@ along with Lasershark. If not, see <http://www.gnu.org/licenses/>.
 // Get number of ilda elements per sample
 #define LASERSHARK_CMD_GET_SAMP_ELEMENT_COUNT 0X85
 // Get number of ilda samples that can be transmitter per packet.
-#define LASERSHARK_CMD_GET_PACKET_SAMP_COUNT 0x86
+#define LASERSHARK_CMD_GET_ISO_PACKET_SAMP_COUNT 0x86
 
 // Get min dac value
 #define LASERSHARK_CMD_GET_DAC_MIN 0x87
