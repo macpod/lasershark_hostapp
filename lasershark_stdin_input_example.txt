@@ -1,0 +1,16 @@
+r=1000 # Value can range from 1 to the max output as reported by the lasershark (64,000). MUST BE FIRST LINE IN FILE!
+# Comment lines start with a # . These are ignored
+e=1 # Sets output state. 1 = enable and 0 = disable
+#
+p=Prints a text string to the console
+#
+s=1,1,1,1,1,1 # Adds a sample to the sample buffer to be written out.
+# The format is x,y,a,b,c,intl_a
+# The ranges for these fields are x=[0-4095],y=[0-4095],a=[0-4095],b=[0-4095],c=[0,1],intl_a=[0,1]
+# For a and b, 0 means the output is off and 4096 means the output is at full power
+# For c and intl_a, 0 means the output is off and 1 means the output is on (for ttl)
+# Samples are queued until they fill a full lasershark packet and are then written out to the lasershark.
+# This means that to ensure ALL samples are written out, a flush should be performed once all desired samples are 
+# written out.
+#
+f=1 # Flushes all samples. It is reccomended to stick this at the end of your output file to ensure all samples are displayed. 
