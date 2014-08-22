@@ -12,4 +12,4 @@ lasershark_twostep: lasershark_twostep.c lasershark_uart_bridge_lib.c ls_ub_twos
 	gcc -Wall -o lasershark_twostep lasershark_twostep.c lasershark_uart_bridge_lib.c ls_ub_twostep_lib.c twostep_host_lib.c twostep_common_lib.c `pkg-config --libs --cflags libusb-1.0`
 
 clean:
-	rm lasershark_jack lasershark_stdin lasershark_twostep
+	rm -f lasershark_jack lasershark_stdin lasershark_stdin_circlemaker lasershark_twostep
