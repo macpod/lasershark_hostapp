@@ -28,9 +28,14 @@ along with Lasershark. If not, see <http://www.gnu.org/licenses/>.
 #include <inttypes.h>
 #include <math.h>
 #include <libusb.h>
+#ifdef _WIN32
+#include <windows.h>
+#else
 #include <signal.h>
+#endif
 #include <time.h>
 #include "lasershark_lib.h"
+#include "getline_portable.h"
 
 
 #define LASERSHARK_VIN 0x1fc9
@@ -40,7 +45,6 @@ along with Lasershark. If not, see <http://www.gnu.org/licenses/>.
 #define BULK_TIMEOUT 100
 
 int do_exit = 0;
-pid_t pid;
 
 
 int lasershark_serialnum_len = 64;
@@ -79,9 +83,32 @@ struct lasershark_sample
 uint32_t current_sample_entry = 0;
 
 
+#ifdef _WIN32
+// Handler function will be called on separate thread!
+static BOOL WINAPI console_ctrl_handler(DWORD dwCtrlType)
+{
+  switch (dwCtrlType)
+  {
+  case CTRL_C_EVENT: // Ctrl+C
+    break;
+  case CTRL_BREAK_EVENT: // Ctrl+Break
+    break;
+  case CTRL_CLOSE_EVENT: // Closing the console window
+    break;
+  case CTRL_LOGOFF_EVENT: // User logs off. Passed only to services!
+    break;
+  case CTRL_SHUTDOWN_EVENT: // System is shutting down. Passed only to services!
+    break;
+  }
+
+  // Return TRUE if handled this message, further handler functions won't be called.
+  // Return FALSE to pass this message to further handlers until default handler calls ExitProcess().
+  return TRUE;
+}
+
+#else
+
 sigset_t mask, oldmask;
-
-
 
 static void sig_hdlr(int signum)
 {
@@ -99,6 +126,7 @@ static void sig_hdlr(int signum)
         printf("what\n");
     }
 }
+#endif
 
 static bool inline send_samples(unsigned int sample_count)
 {
@@ -240,7 +268,12 @@ static bool handle_flush(char* line, size_t len)
             break;
         }
 
+    // TODO: Use something better than sleep
+#ifdef _WIN32
+        Sleep(1000);
+#else
         sleep(1);
+#endif
         printf("still flushing...\n");
     }
 
@@ -295,15 +328,16 @@ int main (int argc, char *argv[])
 {
     int rc;
     uint32_t temp;
+
+#ifndef _WIN32
     struct sigaction sigact;
 
-
-    pid = getpid();
     sigact.sa_handler = sig_hdlr;
     sigemptyset(&sigact.sa_mask);
     sigact.sa_flags = 0;
     sigaction(SIGINT, &sigact, NULL);
     sigaction(SIGUSR1, &sigact, NULL);
+#endif
 
 
     rc = libusb_init(NULL);
@@ -464,19 +498,21 @@ int main (int argc, char *argv[])
         goto out;
     }
 
-
+#ifdef _WIN32
+    SetConsoleCtrlHandler(console_ctrl_handler, TRUE);
+#else
     sigemptyset (&mask);
     sigaddset (&mask, SIGUSR1);
 
     sigprocmask (SIG_BLOCK, &mask, &oldmask);
-
+#endif
 
     printf("===Running===\n");
 
-    if (-1 == (read = getline(&line, &len, stdin)) || read < 1 || line[0] != 'r' || !process_line(line, read)) {
+    if (-1 == (read = getline_portable(&line, &len, stdin)) || read < 1 || line[0] != 'r' || !process_line(line, read)) {
         printf("First command did not specify ilda rate. Quitting.\n");
     } else {
-        while (!do_exit && -1 != (read = getline(&line, &len, stdin)) && process_line(line, read)) {
+        while (!do_exit && -1 != (read = getline_portable(&line, &len, stdin)) && process_line(line, read)) {
             //sigsuspend (&oldmask);
             //printf("Looping... (Must have recieved a signal, don't panic).\n");
         }
