@@ -2,15 +2,22 @@ CC=$(CROSS)gcc
 LD=$(CROSS)ld
 AR=$(CROSS)ar
 PKG_CONFIG=$(CROSS)pkg-config
-CFLAGS=-Wall 
+CFLAGS=-Wall
 
 all: lasershark_jack lasershark_stdin lasershark_stdin_circlemaker lasershark_twostep
+
+all-windows: lasershark_stdin-windows lasershark_stdin_circlemaker-windows
+
 lasershark_jack: lasershark_jack.c lasershark_lib.c
 	$(CC) $(CFLAGS) -o lasershark_jack lasershark_jack.c lasershark_lib.c `$(PKG_CONFIG) --libs --cflags jack libusb-1.0`
 
+lasershark_stdin-windows: CFLAGS+= -mno-ms-bitfields
+lasershark_stdin-windows: lasershark_stdin
 lasershark_stdin: lasershark_stdin.c lasershark_lib.c
 	$(CC) $(CFLAGS) -o lasershark_stdin lasershark_stdin.c lasershark_lib.c getline_portable.c `$(PKG_CONFIG) --libs --cflags libusb-1.0`
 
+lasershark_stdin_circlemaker-windows: CFLAGS+= -mno-ms-bitfields
+lasershark_stdin_circlemaker-windows: lasershark_stdin_circlemaker
 lasershark_stdin_circlemaker: lasershark_stdin_circlemaker.c
 	$(CC) $(CFLAGS) -o lasershark_stdin_circlemaker lasershark_stdin_circlemaker.c -lm
 
