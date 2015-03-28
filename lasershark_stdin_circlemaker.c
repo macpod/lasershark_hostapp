@@ -44,7 +44,7 @@ int main (int argc, char *argv[])
         x_f = sinf(index*step);
         y_f = cosf(index*step);
         printf("s=%u,%u,%u,%u,%u,%u\n",
-               float_to_lasershark_xy(x_f),  float_to_lasershark_xy(y_f), 0,500,0,1); // x, y, g, b, r
+               float_to_lasershark_xy(x_f),  float_to_lasershark_xy(y_f), 4095,4095,1,1); // x, y, a, b, c, intl_a
         index++;
     }
 

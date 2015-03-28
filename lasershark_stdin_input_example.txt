@@ -1,14 +1,33 @@
-r=1000 # Value can range from 1 to the max output as reported by the lasershark (64,000). MUST BE FIRST LINE IN FILE!
-# Comment lines start with a # . These are ignored
-e=1 # Sets output state. 1 = enable and 0 = disable
+r=1000 # THIS MUST BE THE FIRST LINE IN THE FILE! 
+# The "r=number" command sets the speed in points per second (pps) at which samples are displayed by the Lasershark. 
+# The pps speed can be set to any integer between 1 and the maximum value as reported by the Lasershark (64000)   
+# You should not set this value to be greater than what your galvos are capable of operating at.
+# 	Failure to adhere to this guidance can result in galvo damage or decreased lifespan.
+#
+# !!!!!!!!!!!!!!!!!!!!!!!!!DO NOT ATTEMPT TO RUN THIS FILE!!!!!!!!!!!!!!!!!!!!!!!!!
+# THIS FILE IS INTENDED DEMONSTRATE THE lasershark_stdin COMMAND FORMAT ONLY!
+# !!!!!!!!!!!!!!!!!!!!!!!!!DO NOT ATTEMPT TO RUN THIS FILE!!!!!!!!!!!!!!!!!!!!!!!!!
+#
+# Comment lines start with a "#". These are ignored.
+# Command lines may also have comments appended to their ends using the "#" symbol.
+#
+e=1 
+# The "e=" command sets the output enable state of the Lasershark. The output enable status must be set for any
+# laser or galvo control to occur.
+#	"e=1" == enable
+#	"e=0" == disable
 #
 p=Prints a text string to the console
 #
-s=1,1,1,1,1,1 # Adds a sample to the sample buffer to be written out.
-# The format is x,y,a,b,c,intl_a
-# The ranges for these fields are x=[0-4095],y=[0-4095],a=[0-4095],b=[0-4095],c=[0,1],intl_a=[0,1]
-# For a and b, 0 means the output is off and 4096 means the output is at full power
-# For c and intl_a, 0 means the output is off and 1 means the output is on (for ttl)
+s=1,1,1,1,1,1 
+# The "s=" command adds a sample to the sample buffer to be written out to the Lasershark.
+# A sample defines galvo positioning and laser intensity for a particular point to be displayed. 
+# The format is "s=X,Y,A,B,C,INTL_A"
+# The ranges for these fields are X=[0-4095],Y=[0-4095],A=[0-4095],B=[0-4095],C=[0,1],INTL_A=[0,1]
+# For A and B (analog laser control outputs), 0 means the output is off and 4096 means the output is at full power
+# 	1024 would indicate 25% output power, 2048 would indicate 50% output power, etc.
+# For C (TTL laser control output) 0 means the output is off and 1 means the output is on
+# For INTL_A (Interlock A) 0 means the output is off and 1 means the output is on (for ttl)
 # Samples are queued until they fill a full lasershark packet and are then written out to the lasershark.
 # This means that to ensure ALL samples are written out, a flush should be performed once all desired samples are 
 # written out.
