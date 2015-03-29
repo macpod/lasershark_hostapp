@@ -34,7 +34,7 @@ int main (int argc, char *argv[])
     double x_f, y_f;
     uint32_t index = 0;
     float step = 2*M_PI/1000;
-    printf("r=64000\n");
+    printf("r=20000\n");
     printf("e=1\n");
 
     x_f = 0;

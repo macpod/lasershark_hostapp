@@ -145,22 +145,46 @@ static bool inline send_samples(unsigned int sample_count)
     return true;
 }
 
+
+// Sample integers are parsed this way vs scanf/etc for speed reasons.
+static bool inline parse_sample_integer(char* line, size_t len, unsigned int *pos, unsigned int *val)
+{
+    unsigned int orig_pos = *pos;
+    *val = 0;
+    while (*pos < len && line[*pos] >= '0' && line[*pos] <= '9') {
+        *val = 10*(*val) + line[*pos]-'0';
+        (*pos)++;
+        if (*val > lasershark_dac_max_val) {
+            return false;
+        }
+    }
+
+    return orig_pos != *pos;
+}
+
+
 static bool handle_sample(char* line, size_t len)
 {
     unsigned int x, y, a, b, c, intl_a;
+    unsigned int pos;
 
-    if (6 != sscanf(line, "s=%u,%u,%u,%u,%u,%u", &(x), &(y), &(a), &(b), &(c),&(intl_a))) {
-        printf("Received malformed sample command\n");
-        return false;
-    }
-
-    if (x < lasershark_dac_min_val || x > lasershark_dac_max_val ||
-            y < lasershark_dac_min_val || y > lasershark_dac_max_val ||
-            a < lasershark_dac_min_val || a > lasershark_dac_max_val ||
-            b < lasershark_dac_min_val || b > lasershark_dac_max_val ||
-            c > 1 ||
-            intl_a > 1) {
-        printf("Received sample command with bad values\n");
+    // Lets make a giant if statement for fun
+    if (
+        len < 14 ||
+        (pos = 0, line[pos] != 's') || (pos++, line[pos] != '=') ||
+        (pos++, !parse_sample_integer(line, len, &pos, &x)) ||
+        pos >= len || line[pos] !=',' ||
+        (pos++, !parse_sample_integer(line, len, &pos, &y)) ||
+        pos >= len || line[pos] !=',' ||
+        (pos++, !parse_sample_integer(line, len, &pos, &a)) ||
+        pos >= len || line[pos] !=',' ||
+        (pos++, !parse_sample_integer(line, len, &pos, &b)) ||
+        pos >= len || line[pos] !=',' ||
+        (pos++, pos >= len) || (c=line[pos]-'0', c > 1) ||
+        (pos++, pos >= len) || line[pos] !=',' ||
+        (pos++, pos >= len) || (intl_a=line[pos]-'0', intl_a > 1)
+        ) {
+        printf("Received bad sample command\n");
         return false;
     }
 
