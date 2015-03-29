@@ -1,3 +1,8 @@
+# Notes:
+#   MXE was used to cross compile programs for windows
+#   make CROSS=i686-w64-mingw32.static- all-windows
+#   make CROSS=x86_64-w64-mingw32.static- all-windows
+
 CC=$(CROSS)gcc
 LD=$(CROSS)ld
 AR=$(CROSS)ar
