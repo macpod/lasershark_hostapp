@@ -21,7 +21,9 @@ along with Lasershark. If not, see <http://www.gnu.org/licenses/>.
 
 #include <stdio.h>
 #include <errno.h>
+#ifndef _WIN32
 #include <unistd.h>
+#endif
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -36,9 +38,10 @@ along with Lasershark. If not, see <http://www.gnu.org/licenses/>.
 #include <time.h>
 #include "lasershark_lib.h"
 #include "getline_portable.h"
+#include "getopt_portable.h"
 
 
-#define LASERSHARK_VIN 0x1fc9
+#define LASERSHARK_VID 0x1fc9
 #define LASERSHARK_PID 0x04d8
 
 // Bulk timeout in ms
@@ -63,8 +66,7 @@ uint32_t lasershark_ringbuffer_sample_count;
 
 uint32_t lasershark_ilda_rate = 0;
 
-struct libusb_device_handle *devh_ctl = NULL;
-struct libusb_device_handle *devh_data = NULL;
+struct libusb_device_handle *ls_devh = NULL;
 
 
 uint64_t line_number = 0;
@@ -87,23 +89,23 @@ uint32_t current_sample_entry = 0;
 // Handler function will be called on separate thread!
 static BOOL WINAPI console_ctrl_handler(DWORD dwCtrlType)
 {
-  switch (dwCtrlType)
-  {
-  case CTRL_C_EVENT: // Ctrl+C
-    break;
-  case CTRL_BREAK_EVENT: // Ctrl+Break
-    break;
-  case CTRL_CLOSE_EVENT: // Closing the console window
-    break;
-  case CTRL_LOGOFF_EVENT: // User logs off. Passed only to services!
-    break;
-  case CTRL_SHUTDOWN_EVENT: // System is shutting down. Passed only to services!
-    break;
-  }
+    switch (dwCtrlType)
+    {
+    case CTRL_C_EVENT: // Ctrl+C
+        break;
+    case CTRL_BREAK_EVENT: // Ctrl+Break
+        break;
+    case CTRL_CLOSE_EVENT: // Closing the console window
+        break;
+    case CTRL_LOGOFF_EVENT: // User logs off. Passed only to services!
+        break;
+    case CTRL_SHUTDOWN_EVENT: // System is shutting down. Passed only to services!
+        break;
+    }
 
-  // Return TRUE if handled this message, further handler functions won't be called.
-  // Return FALSE to pass this message to further handlers until default handler calls ExitProcess().
-  return TRUE;
+    // Return TRUE if handled this message, further handler functions won't be called.
+    // Return FALSE to pass this message to further handlers until default handler calls ExitProcess().
+    return TRUE;
 }
 
 #else
@@ -132,13 +134,13 @@ static bool inline send_samples(unsigned int sample_count)
 {
     int r, actual;
     do {
-        r = libusb_bulk_transfer(devh_data, (3 | LIBUSB_ENDPOINT_OUT), (unsigned char*)samples,
+        r = libusb_bulk_transfer(ls_devh, (3 | LIBUSB_ENDPOINT_OUT), (unsigned char*)samples,
                                  sizeof(struct lasershark_sample)*sample_count,
                                  &actual, BULK_TIMEOUT);
     } while (!do_exit && r == LIBUSB_ERROR_TIMEOUT);
 
     if (r < 0 && r != LIBUSB_ERROR_TIMEOUT) {
-        printf("Error sending sample packet: %s", libusb_error_name(r));
+        fprintf(stderr, "Error sending sample packet: %s", libusb_error_name(r));
         return false;
     }
 
@@ -183,8 +185,8 @@ static bool handle_sample(char* line, size_t len)
         (pos++, pos >= len) || (c=line[pos]-'0', c > 1) ||
         (pos++, pos >= len) || line[pos] !=',' ||
         (pos++, pos >= len) || (intl_a=line[pos]-'0', intl_a > 1)
-        ) {
-        printf("Received bad sample command\n");
+    ) {
+        fprintf(stderr, "Received bad sample command\n");
         return false;
     }
 
@@ -211,19 +213,19 @@ static bool handle_set_ilda_rate(char* line, size_t len)
     uint32_t rate = 0;
     int rc;
     if (1 != sscanf(line, "r=%u", &rate)) {
-        printf("Received malformated ilda rate command\n");
+        fprintf(stderr, "Received malformated ilda rate command\n");
         return false;
     }
 
     if (rate == 0 || rate > lasershark_max_ilda_rate) {
-        printf("Received ilda rate outside acceptable range\n");
+        fprintf(stderr, "Received ilda rate outside acceptable range\n");
     }
 
     lasershark_ilda_rate = rate;
-    rc = set_ilda_rate(devh_ctl, lasershark_ilda_rate);
+    rc = set_ilda_rate(ls_devh, lasershark_ilda_rate);
     if (rc != LASERSHARK_CMD_SUCCESS)
     {
-        printf("setting ILDA rate failed\n");
+        fprintf(stderr, "setting ILDA rate failed\n");
         return false;
     }
     printf("Setting ILDA rate worked: %u pps\n", lasershark_ilda_rate);
@@ -238,19 +240,19 @@ static bool handle_set_output(char*line, size_t len)
     int rc;
 
     if (1 != sscanf(line, "e=%u", &enable)) {
-        printf("Received malfored enable command\n");
+        fprintf(stderr, "Received malfored enable command\n");
         return false;
     }
 
 
-    rc = set_output(devh_ctl, enable ? LASERSHARK_CMD_OUTPUT_ENABLE : LASERSHARK_CMD_OUTPUT_DISABLE);
+    rc = set_output(ls_devh, enable ? LASERSHARK_CMD_OUTPUT_ENABLE : LASERSHARK_CMD_OUTPUT_DISABLE);
     if (rc != LASERSHARK_CMD_SUCCESS)
     {
-        printf("Setting output failed\n");
+        fprintf(stderr, "Setting output failed\n");
         return false;
     }
     if (enable) {
-        printf("Setting output output worked: %u\n", enable);
+        fprintf(stderr, "Setting output output worked: %u\n", enable);
     }
     return true;
 }
@@ -281,10 +283,10 @@ static bool handle_flush(char* line, size_t len)
     current_sample_entry = 0;
     printf("Flushing...\n");
     while (1) {
-        rc = get_ringbuffer_empty_sample_count(devh_ctl, &empty_samples);
+        rc = get_ringbuffer_empty_sample_count(ls_devh, &empty_samples);
         if (rc != LASERSHARK_CMD_SUCCESS)
         {
-            printf("Getting ringbuffer empty sample count failed.\n");
+            fprintf(stderr, "Getting ringbuffer empty sample count failed.\n");
             return false;
         }
 
@@ -292,7 +294,7 @@ static bool handle_flush(char* line, size_t len)
             break;
         }
 
-    // TODO: Use something better than sleep
+        // TODO: Use something better than sleep
 #ifdef _WIN32
         Sleep(1000);
 #else
@@ -311,7 +313,7 @@ static bool process_line(char* line, size_t len)
     bool rc = true;
 
     if (len < 2) { // Empty lines are not accepted
-        printf("Empty line encountered on line %" PRIu64 "\n", line_number);
+        fprintf(stderr, "Empty line encountered on line %" PRIu64 "\n", line_number);
         return false;
     }
 
@@ -334,12 +336,12 @@ static bool process_line(char* line, size_t len)
     case '#': // Comment
         break;
     default:
-        printf("Unknown command received\n");
+        fprintf(stderr, "Unknown command received\n");
         rc = false;
     }
 
     if (!rc) {
-        printf("Error on line %" PRIu64 ": %s", line_number, line);
+        fprintf(stderr, "Error on line %" PRIu64 ": %s", line_number, line);
     }
 
     line_number++;
@@ -348,14 +350,178 @@ static bool process_line(char* line, size_t len)
 }
 
 
+static void print_lasersharks()
+{
+    int rc;
+    libusb_device **devs;
+    struct libusb_device_handle *devh;
+    struct libusb_device_descriptor desc;
+    ssize_t count;
+    ssize_t i;
+    unsigned char serial[lasershark_serialnum_len];
+
+    count = libusb_get_device_list(NULL, &devs);
+
+    if (count < 0) {
+        fprintf(stderr, "Error encountered acquiring device list: %d\n", (int)count);
+        return;
+    }
+
+    printf("Connected LaserShark units:\n");
+    for (i = 0; i < count; i++) {
+        rc = libusb_get_device_descriptor(devs[i], &desc);
+        if (rc < 0) {
+            fprintf(stderr, "Error obtaining device descriptor: %d\n", /*libusb_error_name(rc)*/rc);
+            break;
+        }
+
+        if (desc.idVendor == LASERSHARK_VID && desc.idProduct == LASERSHARK_PID) {
+
+            rc = libusb_open(devs[i], &devh);
+            if (rc < 0) {
+                fprintf(stderr, "Error opening USB device\n");
+                break;
+            }
+
+            memset(serial, lasershark_serialnum_len, 0);
+            rc = libusb_get_string_descriptor_ascii(devh, desc.iSerialNumber, serial, lasershark_serialnum_len);
+            if (rc < 0) {
+                fprintf(stderr, "Error obtaining iSerialNumber: %d\n", /*libusb_error_name(rc)*/rc);
+                break;
+            }
+            printf("\tiSerialNumber: %s\n", serial);
+
+            libusb_close(devh);
+        }
+    }
+
+    libusb_free_device_list(devs, 1); // Free the list and dereference all devices
+}
+
+
+static bool open_lasershark(const char* serial)
+{
+    int rc;
+    libusb_device **devs = NULL;
+    struct libusb_device_handle *devh = NULL;
+    struct libusb_device_descriptor desc;
+    ssize_t count;
+    ssize_t i;
+
+    count = libusb_get_device_list(NULL, &devs);
+
+    if (count < 0) {
+        fprintf(stderr, "Error encountered acquiring device list: %d\n", (int)count);
+        return false;
+    }
+
+    for (i = 0; i < count; i++) {
+        rc = libusb_get_device_descriptor(devs[i], &desc);
+        if (rc < 0) {
+            fprintf(stderr, "Error obtaining device descriptor: %d\n", /*libusb_error_name(rc)*/rc);
+            break;
+        }
+
+        if (desc.idVendor == LASERSHARK_VID && desc.idProduct == LASERSHARK_PID) {
+
+            rc = libusb_open(devs[i], &devh);
+            if (rc < 0) {
+                fprintf(stderr, "Error opening USB device\n");
+                break;
+            }
+
+            memset(lasershark_serialnum, lasershark_serialnum_len, 0);
+            rc = libusb_get_string_descriptor_ascii(devh, desc.iSerialNumber, lasershark_serialnum, lasershark_serialnum_len);
+            if (rc < 0) {
+                fprintf(stderr, "Error obtaining iSerialNumber: %d\n", /*libusb_error_name(rc)*/rc);
+                break;
+            }
+            if (NULL == serial || strncmp((const char*)lasershark_serialnum, serial, lasershark_serialnum_len)) {
+                printf("iSerialNumber: %s\n", lasershark_serialnum);
+                break;
+            }
+
+            libusb_close(devh);
+            memset(lasershark_serialnum, lasershark_serialnum_len, 0);
+            devh = NULL;
+        }
+    }
+
+    libusb_free_device_list(devs, 1); // Free the list and dereference all devices
+
+    if (devh) {
+        ls_devh = devh;
+        return true;
+    }
+
+    return false;
+}
+
+
+void print_help(const char* prog_name, FILE* stream)
+{
+    fprintf(stream, "%s [OPTION]\n", prog_name);
+    fprintf(stream, "\t-h");
+    fprintf(stream, "\tPrint this help text\n");
+    fprintf(stream, "\t-l");
+    fprintf(stream, "\tLists all connected LaserSharks\n");
+    fprintf(stream, "\t-s <LaserShark Serial Number>\n");
+    fprintf(stream, "\t\tConnect to a specific LaserShark\n");
+}
+
+
 int main (int argc, char *argv[])
 {
     int rc;
     uint32_t temp;
 
+    int hflag = 0;
+    int lflag = 0;
+    int sflag = 0;
+    char* requested_serial = NULL;
+    int c;
+
 #ifndef _WIN32
     struct sigaction sigact;
+#endif
 
+    opterr_portable = 1;
+    while (-1 != (c =getopt_portable(argc, argv, "hls:"))) {
+        switch(c) {
+        case 'h':
+            hflag++;
+            break;
+        case 'l':
+            lflag++;
+            break;
+        case 's':
+            sflag++;
+            requested_serial = optarg_portable;
+            break;
+        default:
+            print_help(argv[0], stderr);
+            exit(1);
+        }
+    }
+
+    if (lflag && sflag) {
+        fprintf(stderr, "Cannot specify both -s and -l flags.\n");
+        print_help(argv[0], stderr);
+        exit(1);
+    }
+
+    if (lflag > 1 || sflag > 1 || hflag > 1) {
+        fprintf(stderr, "Cannot specify flags more than once.\n");
+        print_help(argv[0], stderr);
+        exit(1);
+    }
+
+    if (hflag) {
+        print_help(argv[0], stdout);
+        exit(0);
+    }
+
+#ifndef _WIN32
     sigact.sa_handler = sig_hdlr;
     sigemptyset(&sigact.sa_mask);
     sigact.sa_flags = 0;
@@ -371,144 +537,132 @@ int main (int argc, char *argv[])
         exit(1);
     }
 
-    devh_ctl = libusb_open_device_with_vid_pid(NULL, LASERSHARK_VIN, LASERSHARK_PID);
-    devh_data = libusb_open_device_with_vid_pid(NULL, LASERSHARK_VIN, LASERSHARK_PID);
-    if (!devh_ctl || !devh_data)
+    libusb_set_debug(NULL, 3);
+
+    if (lflag) {
+        print_lasersharks();
+        goto out_post_release;
+    }
+
+    if(!open_lasershark(requested_serial) )
     {
-        fprintf(stderr, "Error finding USB device\n");
+        fprintf(stderr, "Error finding/opening LaserShark\n");
         goto out_post_release;
     }
 
 
-    libusb_set_debug(NULL, 3);
 
-    rc = libusb_claim_interface(devh_ctl, 0);
+    rc = libusb_claim_interface(ls_devh, 0);
     if (rc < 0)
     {
         fprintf(stderr, "Error claiming control interface: %d\n", /*libusb_error_name(rc)*/rc);
         goto out_post_release;
     }
-    rc = libusb_claim_interface(devh_data, 1);
+    rc = libusb_claim_interface(ls_devh, 1);
     if (rc < 0)
     {
         fprintf(stderr, "Error claiming data interface: %d\n", /*libusb_error_name(rc)*/rc);
-        libusb_release_interface(devh_ctl, 0);
+        libusb_release_interface(ls_devh, 0);
         goto out_post_release;
     }
 
-    rc = libusb_set_interface_alt_setting(devh_data, 1, 1);
+    rc = libusb_set_interface_alt_setting(ls_devh, 1, 1);
     if (rc < 0)
     {
         fprintf(stderr, "Error setting alternative (BULK) data interface: %d\n", /*libusb_error_name(rc)*/rc);
         goto out;
     }
 
-
-    struct libusb_device_descriptor desc;
-
-    rc = libusb_get_device_descriptor(libusb_get_device(devh_ctl), &desc);
-    if (rc < 0) {
-        fprintf(stderr, "Error obtaining device descriptor: %d\n", /*libusb_error_name(rc)*/rc);
-    }
-
-    memset(lasershark_serialnum, lasershark_serialnum_len, 0);
-    rc = libusb_get_string_descriptor_ascii(devh_ctl, desc.iSerialNumber, lasershark_serialnum, lasershark_serialnum_len);
-    if (rc < 0) {
-        fprintf(stderr, "Error obtaining iSerialNumber: %d\n", /*libusb_error_name(rc)*/rc);
-    }
-    printf("iSerialNumber: %s\n", lasershark_serialnum);
-
-
-    rc = get_fw_major_version(devh_ctl, &lasershark_fw_major_version);
+    rc = get_fw_major_version(ls_devh, &lasershark_fw_major_version);
     if (rc != LASERSHARK_CMD_SUCCESS)
     {
-        printf("Getting FW Major version failed.\n");
+        fprintf(stderr, "Getting FW Major version failed.\n");
         goto out;
     }
     printf("Getting FW Major version: %d\n", lasershark_fw_major_version);
 
-    rc = get_fw_minor_version(devh_ctl, &lasershark_fw_minor_version);
+    rc = get_fw_minor_version(ls_devh, &lasershark_fw_minor_version);
     if (rc != LASERSHARK_CMD_SUCCESS)
     {
-        printf("Getting FW Minor version failed.\n");
+        fprintf(stderr, "Getting FW Minor version failed.\n");
         goto out;
     }
     printf("Getting FW Minor version: %d\n", lasershark_fw_minor_version);
 
     if (lasershark_fw_major_version != LASERSHARK_FW_MAJOR_VERSION ||
             lasershark_fw_minor_version != LASERSHARK_FW_MINOR_VERSION) {
-        printf("Your FW is not capable of proper bulk transfers or clear commands. Please upgrade your firmware.\n");
+        fprintf(stderr, "Your FW is not capable of proper bulk transfers or clear commands. Please upgrade your firmware.\n");
         goto out;
     }
 
     printf("Clearing ringbuffer\n");
-    rc = clear_ringbuffer(devh_ctl);
+    rc = clear_ringbuffer(ls_devh);
     if (rc != LASERSHARK_CMD_SUCCESS) {
-        printf("Clearing ringbuffer buffer failed.\n");
+        fprintf(stderr, "Clearing ringbuffer buffer failed.\n");
         goto out;
     }
 
 
-    rc = get_bulk_packet_sample_count(devh_ctl, &lasershark_bulk_packet_sample_count);
+    rc = get_bulk_packet_sample_count(ls_devh, &lasershark_bulk_packet_sample_count);
     if (rc != LASERSHARK_CMD_SUCCESS)
     {
-        printf("Getting bulk packet sample count failed\n");
+        fprintf(stderr, "Getting bulk packet sample count failed\n");
         goto out;
     }
     printf("Getting bulk packet sample count: %d\n", lasershark_bulk_packet_sample_count);
 
     samples = malloc(sizeof(struct lasershark_sample)*lasershark_bulk_packet_sample_count);
     if (samples == NULL) {
-        printf("Could not allocate sample array.\n");
+        fprintf(stderr, "Could not allocate sample array.\n");
         goto out;
     }
 
-    rc = get_max_ilda_rate(devh_ctl, &lasershark_max_ilda_rate);
+    rc = get_max_ilda_rate(ls_devh, &lasershark_max_ilda_rate);
     if (rc != LASERSHARK_CMD_SUCCESS)
     {
-        printf("Getting max ilda rate failed\n");
+        fprintf(stderr, "Getting max ilda rate failed\n");
         goto out;
     }
     printf("Getting max ilda rate: %u pps\n", lasershark_max_ilda_rate);
 
 
-    rc = get_dac_min(devh_ctl, &lasershark_dac_min_val);
+    rc = get_dac_min(ls_devh, &lasershark_dac_min_val);
     if (rc != LASERSHARK_CMD_SUCCESS)
     {
-        printf("Getting dac min failed\n");
+        fprintf(stderr, "Getting dac min failed\n");
         goto out;
     }
     printf("Getting dac min: %d\n", lasershark_dac_min_val);
 
 
-    rc = get_dac_max(devh_ctl, &lasershark_dac_max_val);
+    rc = get_dac_max(ls_devh, &lasershark_dac_max_val);
     if (rc != LASERSHARK_CMD_SUCCESS) {
-        printf("Getting dac max failed\n");
+        fprintf(stderr, "Getting dac max failed\n");
         goto out;
     }
     printf("getting dac max: %d\n", lasershark_dac_max_val);
 
 
-    rc = get_ringbuffer_sample_count(devh_ctl, &lasershark_ringbuffer_sample_count);
+    rc = get_ringbuffer_sample_count(ls_devh, &lasershark_ringbuffer_sample_count);
     if (rc != LASERSHARK_CMD_SUCCESS)
     {
-        printf("Getting ringbuffer sample count\n");
+        fprintf(stderr, "Getting ringbuffer sample count\n");
         goto out;
     }
     printf("Getting ringbuffer sample count: %d\n", lasershark_ringbuffer_sample_count);
 
 
-    rc = get_ringbuffer_empty_sample_count(devh_ctl, &temp);
+    rc = get_ringbuffer_empty_sample_count(ls_devh, &temp);
     if (rc != LASERSHARK_CMD_SUCCESS)
     {
-        printf("Getting ringbuffer empty sample count failed.\n");
+        fprintf(stderr, "Getting ringbuffer empty sample count failed.\n");
     }
     printf("Getting ringbuffer empty sample count: %d\n", temp);
 
-    rc = set_output(devh_ctl, LASERSHARK_CMD_OUTPUT_DISABLE);
+    rc = set_output(ls_devh, LASERSHARK_CMD_OUTPUT_DISABLE);
     if (rc != LASERSHARK_CMD_SUCCESS)
     {
-        printf("Disable output failed\n");
+        fprintf(stderr, "Disable output failed\n");
         goto out;
     }
     printf("Disable output worked\n");
@@ -518,7 +672,7 @@ int main (int argc, char *argv[])
 
     char *line = malloc(len+1);
     if (line == NULL) {
-        printf("Buffer malloc failed\n");
+        fprintf(stderr, "Buffer malloc failed\n");
         goto out;
     }
 
@@ -534,7 +688,7 @@ int main (int argc, char *argv[])
     printf("===Running===\n");
 
     if (-1 == (read = getline_portable(&line, &len, stdin)) || read < 1 || line[0] != 'r' || !process_line(line, read)) {
-        printf("First command did not specify ilda rate. Quitting.\n");
+        fprintf(stderr, "First command did not specify ilda rate. Quitting.\n");
     } else {
         while (!do_exit && -1 != (read = getline_portable(&line, &len, stdin)) && process_line(line, read)) {
             //sigsuspend (&oldmask);
@@ -544,31 +698,31 @@ int main (int argc, char *argv[])
     }
 
     printf("===Ending===\n");
-    rc = set_output(devh_ctl, LASERSHARK_CMD_OUTPUT_DISABLE);
+    rc = set_output(ls_devh, LASERSHARK_CMD_OUTPUT_DISABLE);
     if (rc != LASERSHARK_CMD_SUCCESS)
     {
-        printf("Disable output failed\n");
+        fprintf(stderr, "Disable output failed\n");
         goto out;
     }
     printf("Disable output worked\n");
 
-    rc = get_ringbuffer_empty_sample_count(devh_ctl, &temp);
+    rc = get_ringbuffer_empty_sample_count(ls_devh, &temp);
     if (rc != LASERSHARK_CMD_SUCCESS)
     {
-        printf("Getting ringbuffer empty sample count failed.\n");
+        fprintf(stderr, "Getting ringbuffer empty sample count failed.\n");
     }
     if (lasershark_ringbuffer_sample_count-temp>0 || current_sample_entry) {
-        printf("Warning, not all samples displayed. Consider flushing before quitting.\n");
-        printf("\t%u not sent to Lasershark.\n", current_sample_entry);
+        fprintf(stderr, "Warning, not all samples displayed. Consider flushing before quitting.\n");
+        fprintf(stderr, "\t%u not sent to Lasershark.\n", current_sample_entry);
         temp = lasershark_ringbuffer_sample_count - temp;
-        printf("\t%u-%u = %u still in Lasershark's buffer.\n", lasershark_ringbuffer_sample_count, temp, lasershark_ringbuffer_sample_count-temp);
+        fprintf(stderr, "\t%u-%u = %u still in Lasershark's buffer.\n", lasershark_ringbuffer_sample_count, temp, lasershark_ringbuffer_sample_count-temp);
     }
 
 
     printf("Clearing ringbuffer\n");
-    rc = clear_ringbuffer(devh_ctl);
+    rc = clear_ringbuffer(ls_devh);
     if (rc != LASERSHARK_CMD_SUCCESS) {
-        printf("Clearing ringbuffer buffer failed.\n");
+        fprintf(stderr, "Clearing ringbuffer buffer failed.\n");
         goto out;
     }
 
@@ -576,17 +730,13 @@ int main (int argc, char *argv[])
     printf("Quitting gracefully\n");
 
 out:
-    libusb_release_interface(devh_ctl, 0);
-    libusb_release_interface(devh_data, 0);
+    libusb_release_interface(ls_devh, 0);
+    libusb_release_interface(ls_devh, 1);
 
 out_post_release:
-    if (devh_ctl)
+    if (ls_devh)
     {
-        libusb_close(devh_ctl);
-    }
-    if (devh_data)
-    {
-        libusb_close(devh_data);
+        libusb_close(ls_devh);
     }
     libusb_exit(NULL);
 
