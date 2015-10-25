@@ -36,7 +36,7 @@ along with Lasershark. If not, see <http://www.gnu.org/licenses/>.
 #include <signal.h>
 #endif
 #include <time.h>
-#include "lasershark_lib.h"
+#include "lasersharklib/lasershark_lib.h"
 #include "getline_portable.h"
 #include "getopt_portable.h"
 

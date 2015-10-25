@@ -29,7 +29,7 @@ along with Lasershark. If not, see <http://www.gnu.org/licenses/>.
 #include <libusb.h>
 #include <signal.h>
 #include <time.h>
-#include "lasershark_lib.h"
+#include "lasersharklib/lasershark_lib.h"
 
 
 #define LASERSHARK_VIN 0x1fc9
@@ -392,7 +392,8 @@ int main (int argc, char *argv[])
     }
     printf("Getting FW Minor version: %d\n", lasershark_fw_minor_version);
 
-    if (lasershark_fw_minor_version != LASERSHARK_FW_MAJOR_VERSION) {
+    if (lasershark_fw_major_version != LASERSHARK_FW_MAJOR_VERSION ||
+            lasershark_fw_minor_version != LASERSHARK_FW_MINOR_VERSION) {
         printf("Your FW is not capable of proper bulk transfers or clear commands. Consider upgrading your firmware!\n");
     } else {
         printf("Firmware supports ring buffer clears. Clearing now.\n");

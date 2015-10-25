@@ -20,7 +20,7 @@ along with Lasershark. If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "ls_ub_twostep_lib.h"
-#include "lasershark_uart_bridge_lib.h"
+#include "../lasersharklib/lasershark_uart_bridge_lib.h"
 #include "twostep_host_lib.h"
 #include <stdio.h>
 #include <unistd.h>

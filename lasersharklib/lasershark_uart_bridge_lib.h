@@ -59,4 +59,4 @@ int lasershark_ub_tx(libusb_device_handle *dev_ub, uint8_t len, uint8_t *buf, ui
 
 int lasershark_ub_rx(libusb_device_handle *dev_ub, uint8_t len, uint8_t *buf, uint8_t *len_rxed);
 
-#endif /* LASERSHARK_3D_PRINTER_LIB_H_ */
+#endif

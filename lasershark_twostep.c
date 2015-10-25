@@ -28,8 +28,8 @@ along with Lasershark. If not, see <http://www.gnu.org/licenses/>.
 #include <libusb.h>
 #include <signal.h>
 #include <time.h>
-#include "ls_ub_twostep_lib.h"
-#include "lasershark_uart_bridge_lib.h"
+#include "twosteplib/ls_ub_twostep_lib.h"
+#include "lasersharklib/lasershark_uart_bridge_lib.h"
 
 #define LASERSHARK_VIN 0x1fc9
 #define LASERSHARK_PID 0x04d8
