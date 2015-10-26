@@ -1,3 +1,9 @@
 [submodule "lodepng"]
 	path = lodepng
 	url = https://github.com/macpod/lodepng.git
+[submodule "lasersharklib"]
+	path = lasersharklib
+	url = https://github.com/macpod/lasersharklib.git
+[submodule "twosteplib"]
+	path = twosteplib
+	url = https://github.com/macpod/twosteplib.git
