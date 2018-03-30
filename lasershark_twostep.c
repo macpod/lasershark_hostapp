@@ -298,7 +298,7 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Error obtaining device descriptor: %d\n", /*libusb_error_name(rc)*/rc);
     }
 
-    memset(lasershark_serialnum, lasershark_serialnum_len, 0);
+    memset(lasershark_serialnum, 0, lasershark_serialnum_len);
     rc = libusb_get_string_descriptor_ascii(devh_ub, desc.iSerialNumber, lasershark_serialnum, lasershark_serialnum_len);
     if (rc < 0) {
         fprintf(stderr, "Error obtaining iSerialNumber: %d\n", /*libusb_error_name(rc)*/rc);
