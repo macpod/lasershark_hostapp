@@ -9,6 +9,8 @@ lasershark_stdin - LaserShark USB ShowCard Host Application. Piping commands to 
 
 lasershark_stdin_circlemaker - Example application intended to be piped to the lasershark_stdin application. Commands output by this application will generate a circle.
 
+lasershark_stdin_displayimage - Example application that renders a PNG image intended to be piped to the lasershark_stdin application. Commands output by this application will display an image line by line.
+
 Please see the following for details:
 
 http://macpod.net/electronics/lasershark/lasershark.php
